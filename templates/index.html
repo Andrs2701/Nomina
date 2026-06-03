@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liquidación Nómina · Seguridad</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+:root{--azul:#1F4E79;--azul-med:#2E75B6;--azul-cl:#DEEAF1;}
+body{background:#f4f6fb;font-size:.88rem;}
+.navbar{background:var(--azul)!important;}
+.navbar-brand{font-weight:700;letter-spacing:.5px;}
+.nav-tabs .nav-link.active{border-color:var(--azul-med) var(--azul-med) #fff;color:var(--azul);font-weight:600;}
+.nav-tabs .nav-link{color:#555;}
+.card{border-radius:10px;border:none;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+/* Acordeón Parámetros */
+.acc-item{border:none;margin-bottom:.5rem;}
+.acc-btn{background:var(--azul);color:#fff;font-weight:600;border-radius:8px!important;padding:.7rem 1rem;}
+.acc-btn:not(.collapsed){background:var(--azul-med);color:#fff;border-radius:8px 8px 0 0!important;}
+.acc-btn::after{filter:invert(1);}
+.acc-btn:focus{box-shadow:none;}
+.acc-body{border:1px solid #dce6f4;border-top:none;border-radius:0 0 8px 8px;background:#fff;padding:1rem;}
+label.form-label{font-weight:500;color:#333;}
+.form-control,.form-select{font-size:.85rem;}
+/* Empleados */
+#tbl-empleados{table-layout:fixed;min-width:2100px;}
+#tbl-empleados th,#tbl-empleados td{padding:3px 4px;white-space:nowrap;vertical-align:middle;}
+#tbl-empleados input[type=text]{width:38px;text-align:center;font-size:.78rem;padding:2px;text-transform:uppercase;}
+#tbl-empleados input.emp-field{width:100%;font-size:.82rem;}
+.t-D{background:#d1ecf1!important;}.t-N{background:#cce5ff!important;}
+.t-X{background:#f8f9fa!important;color:#aaa;}
+.t-FD{background:#fff3cd!important;}.t-FN{background:#ffe0b2!important;}
+.t-AD{background:#d4edda!important;}.t-AN{background:#c3e6cb!important;}
+/* Resultados */
+#tbl-resultados th{background:var(--azul);color:#fff;font-size:.75rem;text-align:center;white-space:normal;line-height:1.2;}
+#tbl-resultados th.th-ant{background:#1F4E79;}
+#tbl-resultados th.th-act{background:#2E75B6;}
+#tbl-resultados th.th-pos{background:#155724;}
+#tbl-resultados th.th-rec-ant{background:#2c6a9e;}
+#tbl-resultados th.th-ext-ant{background:#3a7abf;}
+#tbl-resultados th.th-rec-act{background:#1d6fa0;}
+#tbl-resultados th.th-ext-act{background:#2585c0;}
+#tbl-resultados th.th-rec-pos{background:#1a6b35;}
+#tbl-resultados th.th-ext-pos{background:#218838;}
+#tbl-resultados td{font-size:.78rem;vertical-align:middle;}
+#tbl-resultados tr:nth-child(even) td{background:#f7fafe;}
+#tbl-resultados .tr-total td{background:#c6efce;font-weight:700;}
+.td-ant{background:#eaf3fb!important;}
+.td-act{background:#e8f4ff!important;}
+.td-pos{background:#eafbee!important;}
+/* Calendario */
+.cal-nav-btn{border:none;background:none;font-size:1.1rem;padding:2px 10px;cursor:pointer;color:#fff;}
+.cal-nav-btn:hover{background:rgba(255,255,255,.15);border-radius:4px;}
+.cal-year-display{font-weight:700;font-size:1rem;}
+.cal-mes{background:#fff;border-radius:8px;padding:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.cal-mes h6{background:var(--azul);color:#fff;border-radius:5px;padding:4px 8px;font-size:.8rem;margin-bottom:6px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:.72rem;}
+.cal-grid .cal-dow{text-align:center;font-weight:600;color:#777;padding:2px;}
+.cal-grid .cal-day{text-align:center;padding:3px 1px;border-radius:4px;cursor:default;min-height:22px;line-height:18px;}
+.cal-day.festivo{background:#ffc107;color:#000;font-weight:700;cursor:pointer;}
+.cal-day.domingo{color:#dc3545;font-weight:600;}
+.cal-day.vacio{background:transparent;}
+.cal-day:not(.vacio):not(.festivo):hover{background:#e8f0fe;}
+/* Detalle */
+#tbl-detalle th{background:var(--azul);color:#fff;font-size:.75rem;text-align:center;white-space:nowrap;}
+#tbl-detalle td{font-size:.76rem;vertical-align:middle;white-space:nowrap;}
+#tbl-detalle tr:nth-child(even) td{background:#f7fafe;}
+#tbl-detalle .tr-foot td{background:#1F4E79;color:#fff;font-weight:700;}
+.ciclo-ant{background:#eaf3fb!important;}
+.ciclo-act{background:#e8f4ff!important;}
+.ciclo-pos{background:#eafbee!important;}
+/* Filtros pill-style */
+.filter-bar{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;
+  background:#fff;border-radius:10px;padding:12px 16px;
+  box-shadow:0 1px 6px rgba(0,0,0,.08);margin-bottom:0;}
+.f-group{display:flex;flex-direction:column;gap:5px;}
+.f-group-label{font-size:.72rem;font-weight:700;color:#555;text-transform:uppercase;
+  letter-spacing:.4px;}
+.f-pills{display:flex;flex-wrap:wrap;gap:5px;}
+.f-pill{border:1.5px solid var(--azul-med);background:#fff;color:var(--azul);
+  border-radius:20px;padding:3px 12px;font-size:.78rem;font-weight:500;
+  cursor:pointer;transition:all .15s;line-height:1.4;white-space:nowrap;}
+.f-pill:hover{background:#e8f3ff;border-color:var(--azul);}
+.f-pill.active{background:var(--azul);color:#fff;border-color:var(--azul);}
+/* Dropdown empleado */
+.f-dropdown{position:relative;}
+.f-dropdown-btn{border:1.5px solid var(--azul-med);background:#fff;color:var(--azul);
+  border-radius:8px;padding:4px 12px;font-size:.8rem;font-weight:500;
+  cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;
+  transition:all .15s;min-width:130px;}
+.f-dropdown-btn:hover{background:#e8f3ff;}
+.f-dropdown-btn.open{background:var(--azul);color:#fff;border-color:var(--azul);}
+.f-dropdown-btn .f-cnt{background:#ffc107;color:#000;border-radius:10px;
+  padding:1px 6px;font-size:.7rem;font-weight:700;}
+.f-dropdown-menu{display:none;position:absolute;top:calc(100% + 4px);left:0;
+  background:#fff;border:1px solid #dce6f4;border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:200;min-width:200px;
+  max-height:220px;overflow-y:auto;padding:6px 0;}
+.f-dropdown-menu.show{display:block;}
+.f-chk-item{display:flex;align-items:center;gap:8px;padding:5px 12px;
+  cursor:pointer;font-size:.82rem;transition:background .1s;}
+.f-chk-item:hover{background:#f0f7ff;}
+.f-chk-item input[type=checkbox]{accent-color:var(--azul);width:14px;height:14px;cursor:pointer;}
+.f-chk-item label{cursor:pointer;margin:0;flex:1;}
+.f-info{display:flex;align-items:center;gap:4px;font-size:.78rem;
+  color:#666;align-self:flex-end;padding-bottom:4px;}
+.drop-zone{border:2px dashed var(--azul-med);border-radius:10px;padding:2rem 1rem;
+  background:#f0f7ff;cursor:pointer;transition:background .2s;text-align:center;}
+.drop-zone.drag-over{background:#deeaf1;border-color:var(--azul);}
+.spinner-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;
+  align-items:center;justify-content:center;}
+.spinner-overlay.show{display:flex;}
+.toast-container{position:fixed;bottom:1rem;right:1rem;z-index:10000;}
+/* ── Tablas grandes: scroll con encabezado fijo + columna fija ── */
+.tbl-scroll{max-height:64vh;overflow:auto;border:1px solid #e3e8ee;border-radius:8px;}
+.tbl-scroll table{margin-bottom:0;}
+.tbl-scroll thead th{position:sticky;top:0;z-index:3;}
+.tbl-scroll thead tr:nth-child(2) th{top:31px;}
+.tbl-sticky1 thead tr:first-child th:first-child,
+.tbl-sticky1 tbody td:first-child,
+.tbl-sticky1 tfoot td:first-child{position:sticky;left:0;z-index:2;background:#fff;box-shadow:1px 0 0 #e3e8ee;}
+.tbl-sticky1 thead tr:first-child th:first-child{z-index:5;}
+.tbl-scroll tbody tr:hover td{background:#eef5ff!important;}
+.pager{display:flex;align-items:center;gap:.6rem;margin-top:.6rem;font-size:.82rem;flex-wrap:wrap;}
+.pager .btn{padding:1px 10px;}
+.search-box{max-width:230px;}
+/* ── Página de inicio ── */
+.home-hero{border-radius:18px;padding:2.6rem 2rem;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(120deg,#16335c 0%,#1F4E79 45%,#2E75B6 100%);
+  box-shadow:0 12px 30px rgba(31,78,121,.25);}
+.home-hero::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;
+  background:rgba(255,255,255,.07);}
+.home-hero::before{content:"";position:absolute;right:80px;bottom:-90px;width:200px;height:200px;border-radius:50%;
+  background:rgba(255,255,255,.05);}
+.home-hero-inner{position:relative;z-index:1;max-width:720px;}
+.home-badge{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:30px;font-size:.78rem;font-weight:600;margin-bottom:1rem;}
+.home-title{font-weight:800;font-size:2.1rem;letter-spacing:.3px;margin-bottom:.6rem;}
+.home-sub{font-size:1rem;opacity:.92;line-height:1.6;margin-bottom:1.4rem;}
+.home-cta{display:flex;gap:.8rem;flex-wrap:wrap;}
+.home-card{background:#fff;border:1px solid #e9eef4;border-radius:14px;padding:1.3rem;height:100%;cursor:pointer;
+  transition:transform .15s,box-shadow .15s,border-color .15s;}
+.home-card:hover{transform:translateY(-4px);box-shadow:0 10px 22px rgba(31,78,121,.13);border-color:#cddcec;}
+.home-ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;margin-bottom:.8rem;}
+.home-card h6{font-weight:700;color:#1F4E79;margin-bottom:.35rem;}
+.home-card p{font-size:.84rem;color:#667;margin:0;line-height:1.45;}
+.home-feats{display:flex;flex-wrap:wrap;gap:1.2rem;margin:1.6rem .2rem .4rem;color:#445;font-size:.88rem;}
+.home-feats span i{color:#1a8c3d;margin-right:.3rem;}
+</style>
+</head>
+<body>
+<nav class="navbar navbar-dark py-2">
+  <div class="container-fluid">
+    <span class="navbar-brand"><i class="bi bi-shield-lock-fill me-2"></i>Sistema de Liquidación de Nómina</span>
+    <button class="btn btn-warning btn-sm fw-bold" id="btn-calcular">
+      <i class="bi bi-calculator me-1"></i>Calcular Nómina
+    </button>
+  </div>
+</nav>
+<div class="spinner-overlay" id="spinner">
+  <div class="text-center text-white">
+    <div class="spinner-border mb-3" style="width:3rem;height:3rem"></div>
+    <div class="fw-bold fs-5">Calculando…</div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<div class="container-fluid py-3">
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-inicio"><i class="bi bi-house-door-fill me-1"></i>Inicio</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-carga"><i class="bi bi-cloud-upload me-1"></i>Cargar Plantilla</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-params"><i class="bi bi-sliders me-1"></i>Parámetros</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-empleados"><i class="bi bi-people-fill me-1"></i>Empleados <span class="badge bg-secondary" id="cnt-emp">0</span></a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-resultados"><i class="bi bi-table me-1"></i>Resultados</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-detalle"><i class="bi bi-search me-1"></i>Detalle</a></li>
+</ul>
+<div class="tab-content">
+
+<!-- ══ TAB INICIO ══ -->
+<div class="tab-pane fade show active" id="tab-inicio">
+  <div class="home-hero">
+    <div class="home-hero-inner">
+      <div class="home-badge"><i class="bi bi-shield-lock-fill me-1"></i>Personal de Seguridad</div>
+      <h1 class="home-title">Sistema de Liquidación de Nómina</h1>
+      <p class="home-sub">Calcula recargos, horas extras, festivos y auxilios de transporte de tu equipo en segundos. Carga tu plantilla, ajusta los parámetros y obtén la liquidación lista para exportar.</p>
+      <div class="home-cta">
+        <button class="btn btn-light btn-lg fw-bold" onclick="irA('tab-carga')"><i class="bi bi-cloud-upload me-2"></i>Cargar Plantilla</button>
+        <button class="btn btn-outline-light btn-lg" onclick="irA('tab-params')"><i class="bi bi-sliders me-2"></i>Configurar Parámetros</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-lg-3 col-md-6">
+      <div class="home-card" onclick="irA('tab-carga')">
+        <div class="home-ico" style="background:#e8f1fb;color:#1F4E79"><i class="bi bi-cloud-upload"></i></div>
+        <h6>1. Carga tu plantilla</h6>
+        <p>Sube el Excel con los empleados y su matriz de turnos. También puedes descargar la plantilla base.</p>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="home-card" onclick="irA('tab-params')">
+        <div class="home-ico" style="background:#eaf6ee;color:#1a6b35"><i class="bi bi-sliders"></i></div>
+        <h6>2. Ajusta parámetros</h6>
+        <p>Recargos, catálogo de turnos y festivos — todo configurable y guardado entre sesiones.</p>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="home-card" onclick="irA('tab-empleados')">
+        <div class="home-ico" style="background:#fef3e6;color:#b9690b"><i class="bi bi-people-fill"></i></div>
+        <h6>3. Revisa empleados</h6>
+        <p>Edita la matriz de turnos con buscador y paginación, incluso con miles de empleados.</p>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="home-card" onclick="document.getElementById('btn-calcular').click()">
+        <div class="home-ico" style="background:#fdeaea;color:#c0392b"><i class="bi bi-calculator"></i></div>
+        <h6>4. Calcula y exporta</h6>
+        <p>Obtén resultados y detalle por turno, y expórtalos a Excel para tus validaciones.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-feats">
+    <span><i class="bi bi-check-circle-fill"></i> Recargos y extras parametrizables</span>
+    <span><i class="bi bi-check-circle-fill"></i> Festivos de Colombia incluidos</span>
+    <span><i class="bi bi-check-circle-fill"></i> Cálculo por ciclos de 21 días</span>
+    <span><i class="bi bi-check-circle-fill"></i> Exportación a Excel</span>
+  </div>
+</div>
+
+<!-- ══ TAB CARGA ══ -->
+<div class="tab-pane fade" id="tab-carga">
+  <div class="row g-3">
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><span class="badge bg-warning text-dark me-1">1</span> Descarga la plantilla</div>
+        <div class="card-body d-flex flex-column align-items-center justify-content-center text-center py-4">
+          <i class="bi bi-file-earmark-excel" style="font-size:3.5rem;color:#1F4E79;opacity:.85"></i>
+          <p class="mt-3 text-muted" style="font-size:.83rem">Plantilla Excel con instrucciones,<br>catálogo de turnos y estructura lista.</p>
+          <a href="/api/plantilla" class="btn btn-success mt-1" download><i class="bi bi-download me-2"></i>Descargar Plantilla</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><span class="badge bg-warning text-dark me-1">2</span> Llena los datos</div>
+        <div class="card-body" style="font-size:.83rem">
+          <p class="fw-bold mb-2 text-primary">Hoja <code>PLANTILLA_CARGA</code> — celdas amarillas:</p>
+          <table class="table table-sm table-bordered mb-2" style="font-size:.78rem">
+            <tr><td class="fw-bold">B</td><td>Nombre del empleado</td></tr>
+            <tr><td class="fw-bold">C</td><td>Salario mensual ($)</td></tr>
+            <tr><td class="fw-bold">D</td><td>Fecha inicio ciclo <em>dd/mm/aaaa</em></td></tr>
+            <tr><td class="fw-bold">E</td><td>Saldo inicial horas</td></tr>
+            <tr><td class="fw-bold text-warning">F</td><td><strong>Días trabajados</strong> (manual)</td></tr>
+            <tr><td class="fw-bold text-warning">G</td><td><strong>Auxilio de transporte</strong> (0=auto)</td></tr>
+            <tr><td class="fw-bold">H-AL</td><td>Código turno días 1-31</td></tr>
+          </table>
+          <div class="alert alert-info py-1 mb-0" style="font-size:.76rem">
+            <strong>Códigos:</strong> D · N · X · FD · FN · AD · AN · VC · IN · P · AU · LC · ID · CV · DE · PS · RT
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><span class="badge bg-warning text-dark me-1">3</span> Sube el archivo</div>
+        <div class="card-body">
+          <div class="drop-zone" id="drop-zone"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="onDrop(event)">
+            <i class="bi bi-cloud-arrow-up" style="font-size:2.8rem;color:var(--azul-med)"></i>
+            <p class="fw-bold text-primary mb-1 mt-2">Arrastra aquí tu plantilla</p>
+            <p class="text-muted mb-2" style="font-size:.8rem">o haz clic para seleccionar</p>
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('file-input').click()">
+              <i class="bi bi-folder2-open me-1"></i>Seleccionar archivo
+            </button>
+            <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none" onchange="onFileSelect(this)">
+          </div>
+          <div id="upload-status" class="mt-2 d-none"></div>
+          <div id="validation-box" class="mt-2 d-none"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><span class="badge bg-warning text-dark me-1">4</span> Calcula la nómina</div>
+        <div class="card-body d-flex flex-column">
+          <div id="emp-preview" class="flex-grow-1 mb-3" style="font-size:.8rem;min-height:120px">
+            <p class="text-muted text-center mt-4"><i class="bi bi-arrow-left me-1"></i>Carga la plantilla primero</p>
+          </div>
+          <button class="btn btn-warning btn-lg fw-bold w-100" onclick="calcularDesdeTab()">
+            <i class="bi bi-calculator me-2"></i>Calcular Nómina
+          </button>
+          <button class="btn btn-success mt-2 w-100 d-none" id="btn-descargar-res">
+            <i class="bi bi-file-earmark-excel me-2"></i>Descargar Resultado
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAB PARÁMETROS con acordeón ══ -->
+<div class="tab-pane fade" id="tab-params">
+  <div class="accordion" id="acc-params">
+
+    <!-- Sección 1: Parámetros generales -->
+    <div class="acc-item accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button acc-btn" type="button" data-bs-toggle="collapse" data-bs-target="#acc-general">
+          <i class="bi bi-gear-fill me-2"></i>Parámetros Generales del Ciclo
+        </button>
+      </h2>
+      <div id="acc-general" class="accordion-collapse collapse show" data-bs-parent="#acc-params">
+        <div class="acc-body">
+          <div class="row g-3">
+            <div class="col-md-2"><label class="form-label">Año</label>
+              <input type="number" class="form-control" id="p-anio" value="2026"></div>
+            <div class="col-md-2"><label class="form-label">Mes</label>
+              <select class="form-select" id="p-mes">
+                <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+                <option value="4" selected>Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+                <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+                <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+              </select></div>
+            <div class="col-md-2"><label class="form-label">Días de ciclo</label>
+              <input type="number" class="form-control" id="p-dias-ciclo" value="21"></div>
+            <div class="col-md-2"><label class="form-label">Horas objetivo</label>
+              <input type="number" class="form-control" id="p-horas-obj" value="132" step="0.5"></div>
+            <div class="col-md-2"><label class="form-label">Horas por turno</label>
+              <input type="number" class="form-control" id="p-horas-turno" value="12.583333" step="0.01"></div>
+            <div class="col-md-2"><label class="form-label">Inicio nocturno (h)</label>
+              <input type="number" class="form-control" id="p-ini-noc" value="19" min="0" max="23"></div>
+            <div class="col-md-2"><label class="form-label">Fin nocturno (h)</label>
+              <input type="number" class="form-control" id="p-fin-noc" value="6" min="0" max="23"></div>
+        <div class="col-md-2">
+          <label class="form-label">Divisor IVH
+            <i class="bi bi-info-circle text-muted" style="font-size:.72rem"
+              title="Horas/mes para calcular el Valor Hora&#13;IVH = Salario / Divisor&#13;Ej: 44h/sem / 6 días × 30 días = 220h/mes"></i>
+          </label>
+          <input type="number" class="form-control" id="p-horas-mes" value="220" step="1" min="1">
+          <small class="text-muted" style="font-size:.72rem">IVH = Salario ÷ 220</small>
+        </div>
+            <div class="col-md-8 d-flex align-items-end">
+              <div class="alert alert-info mb-0 py-2 w-100" style="font-size:.78rem">
+                <strong>Códigos de turno:</strong>
+                <span class="badge t-D ms-1">D</span> Diurno
+                <span class="badge t-N ms-1">N</span> Nocturno
+                <span class="badge t-X ms-1">X</span> Descanso
+                <span class="badge t-FD ms-1">FD</span> Fest.D
+                <span class="badge t-FN ms-1">FN</span> Fest.N
+                <span class="badge t-AD ms-1">AD</span> Adic.D
+                <span class="badge t-AN ms-1">AN</span> Adic.N
+                · VC · IN · P · AU · LC · ID · CV · DE · PS · RT
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección 2: Reglas de liquidación -->
+    <div class="acc-item accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button acc-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc-reglas">
+          <i class="bi bi-percent me-2"></i>Reglas de Liquidación
+        </button>
+      </h2>
+      <div id="acc-reglas" class="accordion-collapse collapse" data-bs-parent="#acc-params">
+        <div class="acc-body">
+          <p class="text-muted mb-3" style="font-size:.82rem">Porcentajes sobre el valor hora (IVH = Salario ÷ Horas objetivo).</p>
+          <div class="row g-3" id="reglas-form"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección 3: Catálogo de Turnos -->
+    <div class="acc-item accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button acc-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc-turnos">
+          <i class="bi bi-clock-history me-2"></i>Catálogo de Turnos
+          <span class="badge bg-warning text-dark ms-2" style="font-size:.7rem">Parametrizable</span>
+        </button>
+      </h2>
+      <div id="acc-turnos" class="accordion-collapse collapse" data-bs-parent="#acc-params">
+        <div class="acc-body">
+          <p class="text-muted mb-2" style="font-size:.82rem">
+            Activa o desactiva <strong>Paga Día</strong> y <strong>Auxilio Transporte</strong> por tipo de turno.
+            Los cambios aplican al calcular. <em>Genera Horas</em> e <em>Inicio</em> son estructurales y no se editan.
+          </p>
+          <div style="overflow-x:auto">
+            <table class="table table-bordered table-sm mb-1" id="tbl-turnos-cat" style="font-size:.81rem;max-width:760px">
+              <thead>
+                <tr>
+                  <th style="background:#1F4E79;color:#fff;width:65px;text-align:center">Código</th>
+                  <th style="background:#1F4E79;color:#fff">Descripción</th>
+                  <th style="background:#1F4E79;color:#fff;width:72px;text-align:center">Inicio</th>
+                  <th style="background:#2E75B6;color:#fff;width:85px;text-align:center">Paga Día</th>
+                  <th style="background:#2E75B6;color:#fff;width:105px;text-align:center">Aux. Transp.</th>
+                  <th style="background:#6c757d;color:#fff;width:85px;text-align:center">Genera Hrs</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-turnos-cat"></tbody>
+            </table>
+          </div>
+          <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Columnas azules son editables. Gris = fijo.</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección 4: Festivos -->
+    <div class="acc-item accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button acc-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc-festivos">
+          <i class="bi bi-calendar3 me-2"></i>Festivos Colombia
+          <span class="badge bg-warning text-dark ms-2" id="cnt-festivos-badge">0</span>
+        </button>
+      </h2>
+      <div id="acc-festivos" class="accordion-collapse collapse" data-bs-parent="#acc-params">
+        <div class="acc-body">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3" style="font-size:.8rem">
+              <span><span class="badge py-2 px-3" style="background:#ffc107;color:#000">■</span> Festivo — clic para eliminar</span>
+              <span style="color:#dc3545;font-weight:700">Dom</span><span class="text-muted"> = Domingo</span>
+              <span class="text-muted">Total: <strong id="cnt-festivos">0</strong> festivos</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <input type="date" class="form-control form-control-sm" id="inp-festivo" style="width:160px">
+              <button class="btn btn-warning btn-sm" id="btn-add-fest"><i class="bi bi-plus-lg me-1"></i>Agregar</button>
+              <div class="d-flex align-items-center gap-0" style="background:var(--azul);border-radius:8px;padding:4px 10px;">
+                <button class="cal-nav-btn" id="btn-yr-prev">&#8592;</button>
+                <span class="cal-year-display text-white mx-2" id="cal-year-lbl">2026</span>
+                <button class="cal-nav-btn" id="btn-yr-next">&#8594;</button>
+              </div>
+            </div>
+          </div>
+          <div class="row g-2" id="cal-container"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- accordion -->
+</div><!-- tab-params -->
+
+<!-- ══ TAB EMPLEADOS ══ -->
+<div class="tab-pane fade" id="tab-empleados">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2" style="background:var(--azul);color:#fff;border-radius:10px 10px 0 0;font-weight:600;">
+      <span><i class="bi bi-people-fill me-2"></i>Matriz de Turnos</span>
+      <div class="d-flex align-items-center gap-2">
+        <input type="text" class="form-control form-control-sm search-box" id="emp-search" placeholder="🔎 Buscar nombre o ID...">
+        <button class="btn btn-sm btn-light" id="btn-add-emp"><i class="bi bi-plus-lg me-1"></i>Agregar</button>
+      </div>
+    </div>
+    <div class="card-body p-2">
+      <div class="tbl-scroll" id="emp-scroll" style="overflow:auto">
+        <table class="table table-bordered table-sm mb-0" id="tbl-empleados">
+          <thead id="thead-emp"></thead>
+          <tbody id="tbody-emp"></tbody>
+        </table>
+      </div>
+      <div class="pager" id="emp-pager"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAB RESULTADOS ══ -->
+<div class="tab-pane fade" id="tab-resultados">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2" style="background:var(--azul);color:#fff;border-radius:10px 10px 0 0;font-weight:600;">
+      <span><i class="bi bi-table me-2"></i>Resultados de Liquidación</span>
+      <div class="d-flex align-items-center gap-2">
+        <input type="text" class="form-control form-control-sm search-box d-none" id="res-search" placeholder="🔎 Buscar empleado o ID...">
+        <button class="btn btn-success btn-sm d-none" id="btn-dl-excel">
+          <i class="bi bi-file-earmark-excel me-1"></i>Descargar Excel
+        </button>
+      </div>
+    </div>
+    <div class="card-body p-2">
+      <div id="res-placeholder" class="text-center text-muted py-5">
+        <i class="bi bi-calculator" style="font-size:3rem;opacity:.25"></i>
+        <p class="mt-2">Presiona <strong>Calcular Nómina</strong> para ver resultados</p>
+      </div>
+      <div class="tbl-scroll d-none" id="res-scroll">
+        <table class="table table-bordered table-sm mb-0" id="tbl-resultados">
+          <thead id="thead-res"></thead>
+          <tbody id="tbody-res"></tbody>
+          <tfoot id="tfoot-res"></tfoot>
+        </table>
+      </div>
+      <div class="pager" id="res-pager"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAB DETALLE ══ -->
+<div class="tab-pane fade" id="tab-detalle">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center" style="background:var(--azul);color:#fff;border-radius:10px 10px 0 0;font-weight:600;">
+      <span><i class="bi bi-search me-2"></i>Detalle por Turno / Día</span>
+      <button class="btn btn-success btn-sm d-none" id="btn-dl-detalle">
+        <i class="bi bi-file-earmark-excel me-1"></i>Descargar Detalle
+      </button>
+    </div>
+    <div class="card-body">
+      <!-- Filtros pill-style con autoaplicación -->
+      <div class="filter-bar mb-3">
+        <!-- Empleado: dropdown con checkboxes -->
+        <div class="f-group" id="fg-emp">
+          <span class="f-group-label"><i class="bi bi-person-fill me-1"></i>Empleado</span>
+          <div class="f-dropdown" id="fd-emp">
+            <button class="f-dropdown-btn" type="button" onclick="toggleFDropdown('fd-emp',event)" id="fd-emp-btn">
+              Todos <span class="f-cnt d-none" id="fd-emp-cnt"></span>
+              <i class="bi bi-chevron-down ms-1" style="font-size:.65rem"></i>
+            </button>
+            <div class="f-dropdown-menu" id="fd-emp-menu"></div>
+          </div>
+        </div>
+        <!-- Ciclo -->
+        <div class="f-group">
+          <span class="f-group-label"><i class="bi bi-arrow-left-right me-1"></i>Ciclo</span>
+          <div class="f-pills" id="pills-ciclo">
+            <button class="f-pill" data-val="ant" onclick="togglePill(this,'ciclo')">Anterior</button>
+            <button class="f-pill" data-val="act" onclick="togglePill(this,'ciclo')">Actual</button>
+            <button class="f-pill" data-val="pos" onclick="togglePill(this,'ciclo')">Posterior</button>
+          </div>
+        </div>
+        <!-- Turno -->
+        <div class="f-group">
+          <span class="f-group-label"><i class="bi bi-clock me-1"></i>Turno</span>
+          <div class="f-pills" id="pills-turno"></div>
+        </div>
+        <!-- Día semana -->
+        <div class="f-group">
+          <span class="f-group-label"><i class="bi bi-calendar-week me-1"></i>Día</span>
+          <div class="f-pills" id="pills-dia">
+            <button class="f-pill" data-val="Lun" onclick="togglePill(this,'dia')">Lun</button>
+            <button class="f-pill" data-val="Mar" onclick="togglePill(this,'dia')">Mar</button>
+            <button class="f-pill" data-val="Mié" onclick="togglePill(this,'dia')">Mié</button>
+            <button class="f-pill" data-val="Jue" onclick="togglePill(this,'dia')">Jue</button>
+            <button class="f-pill" data-val="Vie" onclick="togglePill(this,'dia')">Vie</button>
+            <button class="f-pill" data-val="Sáb" onclick="togglePill(this,'dia')">Sáb</button>
+            <button class="f-pill" data-val="Dom" onclick="togglePill(this,'dia')">Dom</button>
+          </div>
+        </div>
+        <!-- Vista -->
+        <div class="f-group">
+          <span class="f-group-label"><i class="bi bi-layout-text-window me-1"></i>Vista</span>
+          <div class="f-pills" id="pills-vista">
+            <button class="f-pill active" data-val="resumen" onclick="detSetView('resumen')">Resumen</button>
+            <button class="f-pill" data-val="dias" onclick="detSetView('dias')">Día a día</button>
+          </div>
+        </div>
+        <!-- Buscador -->
+        <div class="f-group">
+          <span class="f-group-label"><i class="bi bi-search me-1"></i>Buscar</span>
+          <input type="text" class="form-control form-control-sm search-box" id="det-search" placeholder="Nombre o ID...">
+        </div>
+        <!-- Acciones -->
+        <div class="f-group align-self-end">
+          <button class="btn btn-outline-secondary btn-sm" onclick="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1"></i>Limpiar
+          </button>
+        </div>
+        <!-- Info -->
+        <div class="f-info d-none" id="det-info">
+          <i class="bi bi-funnel-fill me-1 text-primary"></i>
+          <strong id="det-count">0</strong> turnos
+        </div>
+      </div>
+      <!-- Tabla -->
+      <div>
+        <div id="det-placeholder" class="text-center text-muted py-4">
+          <i class="bi bi-calculator" style="font-size:2.5rem;opacity:.25"></i>
+          <p class="mt-2">Calcula la nómina para ver el detalle</p>
+        </div>
+        <div class="tbl-scroll tbl-sticky1 d-none" id="det-scroll">
+        <table class="table table-bordered table-sm mb-0" id="tbl-detalle">
+          <thead>
+            <tr>
+              <th rowspan="2">Empleado</th><th rowspan="2">Día</th><th rowspan="2">Fecha</th>
+              <th rowspan="2">D.Sem</th><th rowspan="2">Turno</th><th rowspan="2">Ciclo</th>
+              <th rowspan="2">Acum.<br>Inicio</th>
+              <th colspan="5" style="background:#2c6a9e">Recargos (≤ obj)</th>
+              <th colspan="5" style="background:#3a7abf">Extras (&gt; obj)</th>
+              <th rowspan="2">Total<br>Hrs</th>
+              <th rowspan="2" style="background:#155724">Vr. Recargo</th>
+              <th rowspan="2" style="background:#155724">Vr. Extra</th>
+              <th rowspan="2" style="background:#155724">Vr. Total</th>
+            </tr>
+            <tr>
+              <th style="background:#2c6a9e">Tot Rec</th><th style="background:#2c6a9e">Diurno</th>
+              <th style="background:#2c6a9e">Noct</th><th style="background:#2c6a9e">Fest D</th>
+              <th style="background:#2c6a9e">Fest N</th>
+              <th style="background:#3a7abf">Tot Ext</th><th style="background:#3a7abf">Diurna</th>
+              <th style="background:#3a7abf">Noct</th><th style="background:#3a7abf">Fest D</th>
+              <th style="background:#3a7abf">Fest N</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-det"></tbody>
+          <tfoot id="tfoot-det"></tfoot>
+        </table>
+        </div><!-- det-scroll -->
+        <div class="pager" id="det-pager"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- tab-content -->
+</div><!-- container -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+var S = {
+  params:{anio:2026,mes:4,dias_ciclo:21,horas_objetivo:132,horas_turno:12.583333,
+          inicio_noc_h:19,fin_noc_h:6,smmlv:1423500,auxilio_transporte_mensual:200000,horas_mes:220},
+  reglas:{REC_DIURNO:0,REC_NOCTURNO:.35,REC_DOM_FEST_DIURNO:.80,REC_DOM_FEST_NOCTURNO:1.15,
+          EXT_DIURNA:1.25,EXT_NOCTURNA:1.75,EXT_FEST_DIURNA:2.05,EXT_FEST_NOCTURNA:2.55},
+  festivos:[],empleados:[],resultados:[],
+  validation:{ok:true,warnings:[],errors:[],summary:{empleados:0,empleados_afectados:0,celdas_turno:0,advertencias:0,errores:0,normalizadas:0}},
+};
+var calYear=2026;
+var PAGE_SIZE=100, RES_PAGE=1, DET_PAGE=1, EMP_PAGE=1, RES_SEARCH='', DET_SEARCH='', EMP_SEARCH='';
+var DET_VIEW='resumen', DET_EXPANDED={};
+function detSetView(v){
+  DET_VIEW=v; DET_PAGE=1;
+  var pills=document.querySelectorAll('#pills-vista .f-pill');
+  for(var i=0;i<pills.length;i++) pills[i].classList.toggle('active', pills[i].dataset.val===v);
+  renderDetalle();
+}
+function detToggleEmp(id){ if(DET_EXPANDED[id]) delete DET_EXPANDED[id]; else DET_EXPANDED[id]=1; renderDetalle(); }
+function renderPager(id,total,page,totalPages,startIdx,shown,go){
+  var el=document.getElementById(id); if(!el) return;
+  if(total<=PAGE_SIZE){ el.innerHTML = total ? '<span class="text-muted">'+total+' filas</span>' : ''; return; }
+  var from=total?startIdx+1:0, to=startIdx+shown;
+  el.innerHTML='<button class="btn btn-sm btn-outline-secondary" '+(page<=1?'disabled':'')+' id="'+id+'-p">&#8592; Anterior</button>'
+    +'<span>Página <strong>'+page+'</strong> de '+totalPages+' · mostrando '+from+'–'+to+' de '+total+'</span>'
+    +'<button class="btn btn-sm btn-outline-secondary" '+(page>=totalPages?'disabled':'')+' id="'+id+'-n">Siguiente &#8594;</button>';
+  var p=document.getElementById(id+'-p'),n=document.getElementById(id+'-n');
+  if(p)p.onclick=function(){go(page-1);};
+  if(n)n.onclick=function(){go(page+1);};
+}
+const REGLAS_LABEL={
+  REC_DIURNO:'Recargo diurno normal',REC_NOCTURNO:'Recargo nocturno',
+  REC_DOM_FEST_DIURNO:'Recargo dom/fest diurno',REC_DOM_FEST_NOCTURNO:'Recargo dom/fest nocturno',
+  EXT_DIURNA:'Extra diurna',EXT_NOCTURNA:'Extra nocturna',
+  EXT_FEST_DIURNA:'Extra fest diurna',EXT_FEST_NOCTURNA:'Extra fest nocturna',
+};
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DOWS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+function fmt(n){return Math.round(n||0).toLocaleString('es-CO');}
+function fmtH(n){return (+(n||0)).toFixed(2);}
+function fechaDMY(iso){ if(!iso) return ''; var p=String(iso).slice(0,10).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : String(iso); }
+function fechaISO(dmy){ if(!dmy) return ''; var s=String(dmy).trim();
+  var m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(m){ var y=m[3].length===2?'20'+m[3]:m[3]; return y+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2); }
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+  return s; }
+function diasEnMes(a,m){return new Date(a,m,0).getDate();}
+
+function toast(msg,tipo){
+  var el=document.createElement('div');
+  el.className='toast align-items-center text-bg-'+tipo+' border-0';el.setAttribute('role','alert');
+  el.innerHTML='<div class="d-flex"><div class="toast-body">'+msg+'</div>'
+    +'<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>';
+  document.getElementById('toast-container').appendChild(el);
+  new bootstrap.Toast(el,{delay:3500}).show();
+  el.addEventListener('hidden.bs.toast',function(){el.remove();});
+}
+function spin(on){document.getElementById('spinner').classList[on?'add':'remove']('show');}
+
+function irA(tabId){
+  var trigger=document.querySelector('[href="#'+tabId+'"]');
+  if(trigger){
+    bootstrap.Tab.getOrCreateInstance(trigger).show();
+    return;
+  }
+  var pane=document.getElementById(tabId);
+  if(pane) pane.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function leerParams(){
+  S.params.anio           =+document.getElementById('p-anio').value;
+  S.params.mes            =+document.getElementById('p-mes').value;
+  S.params.dias_ciclo     =+document.getElementById('p-dias-ciclo').value;
+  S.params.horas_objetivo =+document.getElementById('p-horas-obj').value;
+  S.params.horas_turno    =+document.getElementById('p-horas-turno').value;
+  S.params.inicio_noc_h   =+document.getElementById('p-ini-noc').value;
+  S.params.fin_noc_h      =+document.getElementById('p-fin-noc').value;
+  S.params.horas_mes       =+document.getElementById('p-horas-mes').value;
+}
+
+var _saveTimer=null;
+function saveParams(silent){
+  leerParams();
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(function(){
+    fetch('/api/guardar-params',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({params:S.params,reglas:S.reglas,festivos:S.festivos})})
+      .then(function(r){return r.json();})
+      .then(function(j){if(j.ok && !silent) toast('Parámetros guardados','success');})
+      .catch(function(){toast('No se pudo guardar','danger');});
+  },400);
+}
+
+function applyData(data){
+  if(data.params) Object.assign(S.params,data.params);
+  if(data.reglas) Object.assign(S.reglas,data.reglas);
+  if(data.festivos) S.festivos=data.festivos;
+  if(data.empleados) S.empleados=data.empleados;
+  if(data.validation) S.validation=data.validation;
+  document.getElementById('p-anio').value       =S.params.anio;
+  document.getElementById('p-mes').value        =S.params.mes;
+  document.getElementById('p-dias-ciclo').value =S.params.dias_ciclo;
+  document.getElementById('p-horas-obj').value  =S.params.horas_objetivo;
+  document.getElementById('p-horas-turno').value=S.params.horas_turno;
+  document.getElementById('p-ini-noc').value    =S.params.inicio_noc_h;
+  document.getElementById('p-fin-noc').value    =S.params.fin_noc_h;
+  document.getElementById('p-horas-mes').value  =S.params.horas_mes||220;
+  calYear=S.params.anio||2026;
+  renderReglas(); renderCalendario(); renderEmpleados(); renderCatalogTurnos();
+  renderValidation(S.validation);
+}
+
+function onDrop(e){
+  e.preventDefault(); document.getElementById('drop-zone').classList.remove('drag-over');
+  var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) processFile(f);
+}
+function onFileSelect(inp){var f=inp.files&&inp.files[0];if(f)processFile(f);inp.value='';}
+async function processFile(file){
+  if(!file.name.match(/\.(xlsx|xls)$/i)){toast('Solo .xlsx','warning');return;}
+  var st=document.getElementById('upload-status');
+  st.className='alert alert-info py-2';st.textContent='⏳ Cargando '+file.name+'…';st.classList.remove('d-none');
+  spin(true);
+  try{
+    var fd=new FormData();fd.append('file',file);
+    var r=await fetch('/api/cargar-excel',{method:'POST',body:fd});
+    var j=await r.json();
+    if(j.ok){
+      applyData(j.data);
+      st.className='alert alert-success py-2';st.textContent='✅ '+j.data.empleados.length+' empleados cargados';
+      mostrarPreview(j.data.empleados);
+      document.getElementById('btn-descargar-res').classList.add('d-none');
+      renderValidation(j.data.validation);
+      if(j.data.validation && j.data.validation.errors && j.data.validation.errors.length){
+        toast('Se detectaron turnos inválidos. Revisa la alerta roja.','danger');
+      } else if(j.data.validation && j.data.validation.warnings && j.data.validation.warnings.length){
+        toast('La plantilla se cargó con advertencias de turno.','warning');
+      } else {
+        toast('✅ '+j.data.empleados.length+' empleados cargados','success');
+      }
+    } else {st.className='alert alert-danger py-2';st.textContent='❌ '+j.error;toast('Error: '+j.error,'danger');}
+  } catch(err){st.className='alert alert-danger py-2';st.textContent='❌ Error de conexión';toast('Error: '+err.message,'danger');}
+  spin(false);
+}
+function mostrarPreview(emps){
+  var div=document.getElementById('emp-preview');
+  if(!emps||!emps.length){div.innerHTML='<p class="text-muted text-center mt-3">Sin empleados</p>';return;}
+  var html='<p class="fw-bold text-success mb-1"><i class="bi bi-check-circle me-1"></i>'+emps.length+' empleados listos</p>';
+  html+=emps.slice(0,6).map(function(e){
+    return '<div class="d-flex justify-content-between border-bottom py-1"><small>'+e.nombre+'</small><small class="text-success fw-bold">$'+fmt(e.salario_mensual)+'</small></div>';
+  }).join('');
+  if(emps.length>6) html+='<small class="text-muted">… y '+(emps.length-6)+' más</small>';
+  div.innerHTML=html;
+}
+
+function renderValidation(validation){
+  var box=document.getElementById('validation-box');
+  if(!box) return;
+  validation=validation||{warnings:[],errors:[],summary:{}};
+  var warnings=validation.warnings||[];
+  var errors=validation.errors||[];
+  var total=warnings.length+errors.length;
+  if(!total){
+    box.className='mt-2 d-none';
+    box.innerHTML='';
+    return;
+  }
+
+  var level=errors.length?'danger':'warning';
+  var title=errors.length?'Riesgo detectado en la plantilla':'Plantilla cargada con observaciones';
+  var summary=validation.summary||{};
+  var affected=summary.empleados_afectados||0;
+  var text='Se detectaron '+errors.length+' error(es) y '+warnings.length+' advertencia(s) en '+affected+' empleado(s).';
+  var issues=errors.concat(warnings).slice(0,20);
+  var more=total-issues.length;
+
+  box.className='mt-2';
+  box.innerHTML=''
+    +'<div class="alert alert-'+level+' py-2 mb-2">'
+    +'<div class="fw-bold">'+title+'</div>'
+    +'<div style="font-size:.78rem">'+text+' '
+    +'Celdas revisadas: '+(summary.celdas_turno||0)+'. '
+    +'Normalizaciones automáticas: '+(summary.normalizadas||0)+'.'
+    +'</div></div>'
+    +'<div class="table-responsive" style="max-height:210px;overflow:auto;border:1px solid #e3e8ee;border-radius:8px">'
+    +'<table class="table table-sm table-bordered mb-0" style="font-size:.73rem">'
+    +'<thead><tr class="table-light">'
+    +'<th>Tipo</th><th>Empleado</th><th>Fila</th><th>Día</th><th>Valor</th><th>Detalle</th>'
+    +'</tr></thead><tbody>'
+    +issues.map(function(it){
+      return '<tr>'
+        +'<td class="fw-bold text-'+(it.type==='error'?'danger':'warning')+'">'+(it.type==='error'?'Error':'Aviso')+'</td>'
+        +'<td>'+((it.employee_name||'') + (it.employee_id!==undefined && it.employee_id!==null ? ' (#'+it.employee_id+')' : ''))+'</td>'
+        +'<td class="text-center">'+(it.row||'—')+'</td>'
+        +'<td class="text-center">'+(it.day||'—')+'</td>'
+        +'<td class="text-center"><code>'+(it.value===undefined||it.value===null?'':String(it.value))+'</code></td>'
+        +'<td>'+it.message+(it.suggestion ? ' <span class="text-muted">Sugerencia: <code>'+it.suggestion+'</code></span>' : '')+'</td>'
+      +'</tr>';
+    }).join('')
+    +(more>0?'<tr><td colspan="6" class="text-muted text-center">Mostrando '+issues.length+' de '+total+' hallazgos</td></tr>':'')
+    +'</tbody></table></div>';
+}
+
+async function calcularDesdeTab(){
+  if(!S.empleados.length){toast('Carga la plantilla primero','warning');return;}
+  await calcular(); document.querySelector('[href="#tab-resultados"]').click();
+}
+document.getElementById('btn-calcular').addEventListener('click',function(){
+  if(!S.empleados.length){toast('Agrega empleados primero','warning');return;}
+  calcular().then(function(){document.querySelector('[href="#tab-resultados"]').click();});
+});
+async function calcular(){
+  leerParams(); spin(true);
+  try{
+    var r=await fetch('/api/calcular',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({params:S.params,empleados:S.empleados,reglas:S.reglas,festivos:S.festivos})});
+    var j=await r.json();
+    if(j.ok){
+      S.resultados=j.resultados;
+      if(j.validation) S.validation=j.validation;
+      renderResultados(); poblarFiltrosDetalle(); renderDetalle();
+      renderValidation(S.validation);
+      document.getElementById('btn-descargar-res').classList.remove('d-none');
+      toast('✅ Liquidados '+j.resultados.length+' empleados','success');
+    } else {
+      if(j.validation){
+        S.validation=j.validation;
+        renderValidation(S.validation);
+      }
+      toast('Error: '+j.error,'danger');
+    }
+  } catch(err){toast('Error: '+err.message,'danger');}
+  spin(false);
+}
+async function descargarExcel(){
+  leerParams(); spin(true);
+  try{
+    var r=await fetch('/api/descargar',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({params:S.params,empleados:S.empleados,reglas:S.reglas,festivos:S.festivos})});
+    if(!r.ok){toast('Error al generar Excel','danger');return;}
+    var blob=await r.blob(); var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;
+    a.download='Liquidacion_'+S.params.anio+'_'+String(S.params.mes).padStart(2,'0')+'.xlsx';
+    a.click(); URL.revokeObjectURL(url); toast('📥 Excel descargado','success');
+  } finally{spin(false);}
+}
+document.getElementById('btn-dl-excel').addEventListener('click',descargarExcel);
+document.getElementById('btn-descargar-res').addEventListener('click',descargarExcel);
+
+async function descargarDetalle(){
+  leerParams(); spin(true);
+  try{
+    var r=await fetch('/api/descargar-detalle',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({params:S.params,empleados:S.empleados,reglas:S.reglas,festivos:S.festivos})});
+    if(!r.ok){toast('Error al generar el detalle','danger');return;}
+    var blob=await r.blob(); var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;
+    a.download='Detalle_Nomina_'+S.params.anio+'_'+String(S.params.mes).padStart(2,'0')+'.xlsx';
+    a.click(); URL.revokeObjectURL(url); toast('📥 Detalle descargado','success');
+  } finally{spin(false);}
+}
+document.getElementById('btn-dl-detalle').addEventListener('click',descargarDetalle);
+
+// ─── Resultados ───
+function renderResultados(){
+  var tbl=document.getElementById('tbl-resultados');
+  var thead=document.getElementById('thead-res'),tbody=document.getElementById('tbody-res'),tfoot=document.getElementById('tfoot-res');
+  document.getElementById('res-placeholder').classList.add('d-none');
+  document.getElementById('res-scroll').classList.remove('d-none');
+  document.getElementById('btn-dl-excel').classList.remove('d-none');
+  document.getElementById('res-search').classList.remove('d-none');
+  function pc(k){return Math.round((S.reglas[k]||0)*100);}
+  thead.innerHTML='<tr>'
+    +'<th class="th-ant">ID</th><th class="th-ant" style="min-width:150px">Empleado</th>'
+    +'<th class="th-ant">Salario</th>'
+    +'<th class="th-rec-act">Rec. Nocturno '+pc("REC_NOCTURNO")+'%</th>'
+    +'<th class="th-rec-act">Rec. Dom/Fest '+pc("REC_DOM_FEST_DIURNO")+'%</th>'
+    +'<th class="th-rec-act">Rec. Dom/Fest Noct '+pc("REC_DOM_FEST_NOCTURNO")+'%</th>'
+    +'<th class="th-rec-act">Total Recargos</th>'
+    +'<th class="th-ext-act">H.E Diurna '+pc("EXT_DIURNA")+'%</th>'
+    +'<th class="th-ext-act">H.E Nocturna '+pc("EXT_NOCTURNA")+'%</th>'
+    +'<th class="th-ext-act">H.E Fest Diurna '+pc("EXT_FEST_DIURNA")+'%</th>'
+    +'<th class="th-ext-act">H.E Fest Noct '+pc("EXT_FEST_NOCTURNA")+'%</th>'
+    +'<th class="th-ext-act">Total H.E</th>'
+    +'<th class="th-ant">Auxilio</th>'
+    +'<th class="th-ant">Total a Pagar</th></tr>';
+  // Búsqueda por nombre o ID
+  var term=RES_SEARCH.trim().toLowerCase();
+  var data=S.resultados.filter(function(r){
+    return !term || String(r.id).indexOf(term)>=0 || String(r.nombre||'').toLowerCase().indexOf(term)>=0;
+  });
+  // Totales sobre TODO el conjunto filtrado
+  var tSal=0,tNoct=0,tFd=0,tFn=0,tRec=0,tEd=0,tEn=0,tEfd=0,tEfn=0,tExt=0,tAux=0,tP=0;
+  data.forEach(function(r){var v=r.val||{};
+    tSal+=r.salario_mensual; tNoct+=v.rec_noct||0; tFd+=v.rec_fest_d||0; tFn+=v.rec_fest_n||0;
+    tRec+=r.valor_recargo; tEd+=v.ext_diurna||0; tEn+=v.ext_noct||0; tEfd+=v.ext_fest_d||0; tEfn+=v.ext_fest_n||0;
+    tExt+=r.valor_extra; tAux+=r.auxilio_transporte; tP+=r.total_pagar;
+  });
+  // Paginación
+  var totalPages=Math.max(1,Math.ceil(data.length/PAGE_SIZE));
+  if(RES_PAGE>totalPages) RES_PAGE=totalPages;
+  if(RES_PAGE<1) RES_PAGE=1;
+  var startIdx=(RES_PAGE-1)*PAGE_SIZE;
+  var pageRows=data.slice(startIdx,startIdx+PAGE_SIZE);
+  tbody.innerHTML=pageRows.map(function(r){
+    var v=r.val||{};
+    return '<tr><td class="text-center">'+r.id+'</td><td>'+r.nombre+'</td>'
+      +'<td class="text-end">$'+fmt(r.salario_mensual)+'</td>'
+      +'<td class="text-end">$'+fmt(v.rec_noct)+'</td>'
+      +'<td class="text-end">$'+fmt(v.rec_fest_d)+'</td>'
+      +'<td class="text-end">$'+fmt(v.rec_fest_n)+'</td>'
+      +'<td class="text-end fw-bold text-success">$'+fmt(r.valor_recargo)+'</td>'
+      +'<td class="text-end">$'+fmt(v.ext_diurna)+'</td>'
+      +'<td class="text-end">$'+fmt(v.ext_noct)+'</td>'
+      +'<td class="text-end">$'+fmt(v.ext_fest_d)+'</td>'
+      +'<td class="text-end">$'+fmt(v.ext_fest_n)+'</td>'
+      +'<td class="text-end fw-bold text-primary">$'+fmt(r.valor_extra)+'</td>'
+      +'<td class="text-end">$'+fmt(r.auxilio_transporte)+'</td>'
+      +'<td class="text-end fw-bold text-danger">$'+fmt(r.total_pagar)+'</td></tr>';
+  }).join('');
+  tfoot.innerHTML='<tr class="tr-total"><td colspan="2" class="text-center">TOTALES ('+data.length+' emp.)</td>'
+    +'<td class="text-end">$'+fmt(tSal)+'</td>'
+    +'<td class="text-end">$'+fmt(tNoct)+'</td><td class="text-end">$'+fmt(tFd)+'</td><td class="text-end">$'+fmt(tFn)+'</td>'
+    +'<td class="text-end text-success">$'+fmt(tRec)+'</td>'
+    +'<td class="text-end">$'+fmt(tEd)+'</td><td class="text-end">$'+fmt(tEn)+'</td><td class="text-end">$'+fmt(tEfd)+'</td><td class="text-end">$'+fmt(tEfn)+'</td>'
+    +'<td class="text-end text-primary">$'+fmt(tExt)+'</td>'
+    +'<td class="text-end">$'+fmt(tAux)+'</td><td class="text-end fw-bold text-danger">$'+fmt(tP)+'</td></tr>';
+  renderPager('res-pager',data.length,RES_PAGE,totalPages,startIdx,pageRows.length,function(p){RES_PAGE=p;renderResultados();});
+}
+
+// ─── Reglas ───
+function renderReglas(){
+  var cont=document.getElementById('reglas-form');cont.innerHTML='';
+  var fases=[['RECARGOS — dentro de las horas objetivo',['REC_DIURNO','REC_NOCTURNO','REC_DOM_FEST_DIURNO','REC_DOM_FEST_NOCTURNO']],
+             ['EXTRAS — por encima de las horas objetivo',['EXT_DIURNA','EXT_NOCTURNA','EXT_FEST_DIURNA','EXT_FEST_NOCTURNA']]];
+  fases.forEach(function(f){
+    var sec=document.createElement('div');sec.className='col-12';
+    sec.innerHTML='<h6 class="fw-bold text-primary border-bottom pb-1 mb-2">'+f[0]+'</h6>';
+    var row=document.createElement('div');row.className='row g-2';
+    f[1].forEach(function(k){
+      var col=document.createElement('div');col.className='col-md-3';
+      col.innerHTML='<label class="form-label mb-1" style="font-size:.8rem">'+REGLAS_LABEL[k]+'</label>'
+        +'<div class="input-group input-group-sm"><input type="number" class="form-control" id="r-'+k
+        +'" value="'+S.reglas[k]+'" step="0.01" min="0"><span class="input-group-text">×IVH</span></div>'
+        +'<small class="text-muted" id="rs-'+k+'" style="font-size:.72rem">'+Math.round(S.reglas[k]*100)+(k.indexOf("EXT_")===0?'% del valor hora':'% adicional')+'</small>';
+      row.appendChild(col);
+    });
+    sec.appendChild(row);cont.appendChild(sec);
+  });
+  Object.keys(S.reglas).forEach(function(k){
+    var inp=document.getElementById('r-'+k);
+    if(inp) inp.addEventListener('input',function(){
+      S.reglas[k]=parseFloat(inp.value)||0;
+      var s=document.getElementById('rs-'+k);
+      if(s) s.textContent=Math.round(S.reglas[k]*100)+(k.indexOf("EXT_")===0?'% del valor hora':'% adicional');
+    });
+    if(inp) inp.addEventListener('change',function(){S.reglas[k]=parseFloat(inp.value)||0;saveParams();});
+  });
+}
+
+// ─── Calendario ───
+function renderCalendario(){
+  var anio=calYear;
+  document.getElementById('cal-year-lbl').textContent=anio;
+  document.getElementById('cnt-festivos').textContent=S.festivos.length;
+  document.getElementById('cnt-festivos-badge').textContent=S.festivos.length;
+  var festSet=new Set(S.festivos);
+  var cont=document.getElementById('cal-container');cont.innerHTML='';
+  for(var m=1;m<=12;m++){
+    var col=document.createElement('div');col.className='col-xl-2 col-lg-3 col-md-4 col-sm-6';
+    var dias=new Date(anio,m,0).getDate();
+    var primerDow=new Date(anio,m-1,1).getDay();
+    var html='<div class="cal-mes"><h6>'+MESES[m-1]+'</h6><div class="cal-grid">';
+    DOWS.forEach(function(d){html+='<div class="cal-dow">'+d+'</div>';});
+    for(var i=0;i<primerDow;i++) html+='<div class="cal-day vacio"></div>';
+    for(var d=1;d<=dias;d++){
+      var dt=anio+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      var dow=new Date(anio,m-1,d).getDay();
+      var esFest=festSet.has(dt);var esDom=dow===0;
+      var cls='cal-day'+(esFest?' festivo':'')+(esDom&&!esFest?' domingo':'');
+      html+='<div class="'+cls+'" data-f="'+dt+'" title="'+dt+(esFest?' — clic para eliminar':'')+'">'+d+'</div>';
+    }
+    html+='</div></div>';
+    col.innerHTML=html;
+    col.querySelectorAll('.festivo').forEach(function(el){
+      el.addEventListener('click',function(){
+        S.festivos=S.festivos.filter(function(x){return x!==el.dataset.f;}); renderCalendario(); saveParams(true);
+      });
+    });
+    cont.appendChild(col);
+  }
+}
+document.getElementById('btn-yr-prev').addEventListener('click',function(){calYear--;renderCalendario();});
+document.getElementById('btn-yr-next').addEventListener('click',function(){calYear++;renderCalendario();});
+document.getElementById('btn-add-fest').addEventListener('click',function(){
+  var v=document.getElementById('inp-festivo').value;
+  if(!v){toast('Selecciona una fecha','warning');return;}
+  if(!S.festivos.includes(v)){
+    S.festivos.push(v); calYear=parseInt(v.substring(0,4)); renderCalendario(); saveParams(true); toast('Festivo '+v+' agregado','success');
+  } else {toast('Ese festivo ya está cargado','warning');}
+});
+
+// ─── Empleados ───
+function renderEmpleados(){
+  var anio=S.params.anio||2026,mes=S.params.mes||4;
+  var dias=diasEnMes(anio,mes);
+  var thead=document.getElementById('thead-emp');
+  var tr='<tr><th style="width:40px">#</th><th style="width:200px">Nombre</th>'
+    +'<th style="width:120px">Salario</th><th style="width:100px">Inicio Ciclo</th>'
+    +'<th style="width:70px">Saldo Hrs</th>'
+    +'<th style="width:75px">Días Trab.</th><th style="width:90px">Aux. Transp.</th>';
+  for(var d=1;d<=dias;d++) tr+='<th style="width:38px" class="text-center">'+d+'</th>';
+  tr+='<th style="width:40px"></th></tr>';
+  thead.innerHTML=tr;
+  var tbody=document.getElementById('tbody-emp');tbody.innerHTML='';
+  // Filtro por nombre o ID (conservando el índice global)
+  var term=EMP_SEARCH.trim().toLowerCase();
+  var list=[];
+  S.empleados.forEach(function(emp,idx){
+    if(term && String(emp.id||idx+1).indexOf(term)<0 && String(emp.nombre||'').toLowerCase().indexOf(term)<0) return;
+    list.push({emp:emp,gidx:idx});
+  });
+  // Paginación
+  var totalPages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));
+  if(EMP_PAGE>totalPages) EMP_PAGE=totalPages; if(EMP_PAGE<1) EMP_PAGE=1;
+  var startIdx=(EMP_PAGE-1)*PAGE_SIZE;
+  var pageList=list.slice(startIdx,startIdx+PAGE_SIZE);
+  pageList.forEach(function(it){tbody.appendChild(crearFila(it.emp,it.gidx,dias));});
+  renderPager('emp-pager',list.length,EMP_PAGE,totalPages,startIdx,pageList.length,function(p){EMP_PAGE=p;renderEmpleados();});
+  document.getElementById('cnt-emp').textContent=S.empleados.length;
+}
+var TURNO_FILLS={'D':'t-D','N':'t-N','X':'t-X','FD':'t-FD','FN':'t-FN','AD':'t-AD','AN':'t-AN'};
+function crearFila(emp,idx,dias){
+  var tr=document.createElement('tr');tr.dataset.idx=idx;
+  var cells='<td class="text-center text-muted">'+(emp.id||idx+1)+'</td>'
+    +'<td><input type="text" class="form-control form-control-sm emp-field" data-f="nombre" value="'+(emp.nombre||'')+'"></td>'
+    +'<td><input type="number" class="form-control form-control-sm emp-field" data-f="salario_mensual" value="'+(emp.salario_mensual||0)+'" step="1"></td>'
+    +'<td><input type="text" class="form-control form-control-sm emp-field" data-f="fecha_inicio_ciclo" value="'+fechaDMY(emp.fecha_inicio_ciclo)+'" placeholder="dd/mm/aaaa" style="width:100px"></td>'
+    +'<td><input type="number" class="form-control form-control-sm emp-field" data-f="saldo_inicial_horas" value="'+(emp.saldo_inicial_horas||0)+'" step="0.5"></td>'
+    +'<td><input type="number" class="form-control form-control-sm emp-field" data-f="dias_trabajados_manual" value="'+(emp.dias_trabajados_manual||'')+'" min="0" placeholder="auto" style="width:65px"></td>'
+    +'<td><input type="number" class="form-control form-control-sm emp-field" data-f="auxilio_transporte_manual" value="'+(emp.auxilio_transporte_manual||'')+'" min="0" step="1000" placeholder="auto" style="width:82px"></td>';
+  for(var d=1;d<=dias;d++){
+    var t=(emp.turnos||{})[String(d)]||'';var cls=TURNO_FILLS[t]||'';
+    cells+='<td class="'+cls+'"><input type="text" data-d="'+d+'" value="'+t+'" maxlength="3"></td>';
+  }
+  cells+='<td class="text-center"><button class="btn btn-sm btn-outline-danger py-0 px-1 btn-del"><i class="bi bi-trash3"></i></button></td>';
+  tr.innerHTML=cells;
+  tr.querySelectorAll('.emp-field').forEach(function(inp){
+    inp.addEventListener('change',function(){
+      var f=inp.dataset.f;
+      if(f==='fecha_inicio_ciclo'){S.empleados[idx][f]=fechaISO(inp.value);inp.value=fechaDMY(S.empleados[idx][f]);}
+      else if(f==='nombre'){S.empleados[idx][f]=inp.value;}
+      else if(f==='dias_trabajados_manual'||f==='auxilio_transporte_manual'){
+        var v=inp.value.trim();
+        if(v===''||v==='0'){delete S.empleados[idx][f];}else{S.empleados[idx][f]=parseFloat(v);}
+      } else {S.empleados[idx][f]=parseFloat(inp.value);}
+    });
+  });
+  tr.querySelectorAll('input[data-d]').forEach(function(inp){
+    inp.addEventListener('change',function(){
+      var d=inp.dataset.d;var val=inp.value.toUpperCase().trim();inp.value=val;
+      if(!S.empleados[idx].turnos) S.empleados[idx].turnos={};
+      if(val) S.empleados[idx].turnos[d]=val; else delete S.empleados[idx].turnos[d];
+      var cls=TURNO_FILLS[val]||'';
+      Object.values(TURNO_FILLS).forEach(function(c){inp.parentElement.classList.remove(c);});
+      if(cls) inp.parentElement.classList.add(cls);
+    });
+  });
+  tr.querySelector('.btn-del').addEventListener('click',function(){S.empleados.splice(idx,1);renderEmpleados();});
+  return tr;
+}
+document.getElementById('btn-add-emp').addEventListener('click',function(){
+  leerParams();
+  S.empleados.push({id:S.empleados.length+1,nombre:'',salario_mensual:0,
+    fecha_inicio_ciclo:S.params.anio+'-'+String(S.params.mes).padStart(2,'0')+'-01',
+    saldo_inicial_horas:0,turnos:{}});
+  EMP_SEARCH=''; var esi=document.getElementById('emp-search'); if(esi) esi.value='';
+  EMP_PAGE=Math.ceil(S.empleados.length/PAGE_SIZE);  // saltar a la última página
+  renderEmpleados();
+  var last=document.getElementById('tbody-emp').lastElementChild;
+  if(last) last.querySelector('input').focus();
+});
+['p-anio','p-mes'].forEach(function(id){
+  document.getElementById(id).addEventListener('change',function(){leerParams();renderEmpleados();});
+});
+
+// ─── Filtros pill + dropdown ───
+var FILTER_STATE = {emp:[], ciclo:[], turno:[], dia:[]};
+
+function togglePill(btn, group){
+  btn.classList.toggle('active');
+  var val=btn.dataset.val;
+  var arr=FILTER_STATE[group];
+  var idx=arr.indexOf(val);
+  if(idx===-1) arr.push(val); else arr.splice(idx,1);
+  renderDetalle();
+}
+
+function toggleFDropdown(id, evt){
+  evt.stopPropagation();
+  var menu=document.getElementById(id+'-menu');
+  var btn=document.getElementById(id+'-btn');
+  var isOpen=menu.classList.contains('show');
+  // Cerrar todos los dropdowns primero
+  document.querySelectorAll('.f-dropdown-menu.show').forEach(function(m){m.classList.remove('show');});
+  document.querySelectorAll('.f-dropdown-btn.open').forEach(function(b){b.classList.remove('open');});
+  if(!isOpen){menu.classList.add('show'); btn.classList.add('open');}
+}
+document.addEventListener('click',function(){
+  document.querySelectorAll('.f-dropdown-menu.show').forEach(function(m){m.classList.remove('show');});
+  document.querySelectorAll('.f-dropdown-btn.open').forEach(function(b){b.classList.remove('open');});
+});
+
+function toggleEmpChk(val, chk){
+  var arr=FILTER_STATE.emp;
+  var idx=arr.indexOf(val);
+  if(chk.checked){if(idx===-1)arr.push(val);}
+  else{if(idx!==-1)arr.splice(idx,1);}
+  // Actualizar badge del botón
+  var cnt=document.getElementById('fd-emp-cnt');
+  if(arr.length>0){cnt.textContent=arr.length;cnt.classList.remove('d-none');}
+  else{cnt.classList.add('d-none');}
+  renderDetalle();
+}
+
+function poblarFiltrosDetalle(){
+  var menu=document.getElementById('fd-emp-menu');
+  menu.innerHTML='';
+  S.resultados.forEach(function(r){
+    var item=document.createElement('div');item.className='f-chk-item';
+    var chk=document.createElement('input');chk.type='checkbox';chk.id='chk-emp-'+r.id;
+    chk.value=String(r.id);
+    chk.addEventListener('change',function(){toggleEmpChk(String(r.id),chk);});
+    var lbl=document.createElement('label');lbl.htmlFor='chk-emp-'+r.id;lbl.textContent=r.nombre;
+    item.appendChild(chk);item.appendChild(lbl);menu.appendChild(item);
+  });
+  // Turnos
+  var turnos=new Set();
+  S.resultados.forEach(function(r){(r.detalle_dias||[]).forEach(function(d){if(d.turno)turnos.add(d.turno);});});
+  var pillsT=document.getElementById('pills-turno');pillsT.innerHTML='';
+  Array.from(turnos).sort().forEach(function(t){
+    var btn=document.createElement('button');
+    btn.className='f-pill';btn.dataset.val=t;btn.textContent=t;
+    btn.onclick=function(){togglePill(btn,'turno');};
+    pillsT.appendChild(btn);
+  });
+  // Reset estado
+  FILTER_STATE={emp:[],ciclo:[],turno:[],dia:[]};
+}
+
+function limpiarFiltros(){
+  FILTER_STATE={emp:[],ciclo:[],turno:[],dia:[]};
+  document.querySelectorAll('.f-pill.active').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.f-chk-item input').forEach(function(c){c.checked=false;});
+  var cnt=document.getElementById('fd-emp-cnt');cnt.classList.add('d-none');
+  renderDetalle();
+}
+
+function renderDetalle(){
+  var tbody=document.getElementById('tbody-det'),tfoot=document.getElementById('tfoot-det');
+  if(!S.resultados.length) return;
+  document.getElementById('det-placeholder').classList.add('d-none');
+  document.getElementById('det-scroll').classList.remove('d-none');
+  document.getElementById('btn-dl-detalle').classList.remove('d-none');
+
+  var fEmps=FILTER_STATE.emp, fCiclos=FILTER_STATE.ciclo, fTurnos=FILTER_STATE.turno, fDias=FILTER_STATE.dia;
+  var term=DET_SEARCH.trim().toLowerCase();
+  var CICLO_LABEL={'ant':'Anterior','act':'Actual','pos':'Posterior'};
+  var CICLO_CLS={'ant':'ciclo-ant','act':'ciclo-act','pos':'ciclo-pos'};
+  var HK=['total_hrs','total_rec','rec_diurno','rec_nocturno','rec_fest_d','rec_fest_n',
+          'total_ext','ext_diurna','ext_nocturna','ext_fest_d','ext_fest_n','valor_recargo','valor_extra','valor_total'];
+
+  // Agrupar por empleado, respetando filtros
+  var groups=[];
+  S.resultados.forEach(function(r){
+    if(fEmps.length && !fEmps.includes(String(r.id))) return;
+    if(term && String(r.id).indexOf(term)<0 && String(r.nombre||'').toLowerCase().indexOf(term)<0) return;
+    var dias=(r.detalle_dias||[]).filter(function(d){
+      if(fCiclos.length && !fCiclos.includes(d.ciclo)) return false;
+      if(fTurnos.length && !fTurnos.includes(d.turno)) return false;
+      if(fDias.length && !fDias.includes(d.dia_semana)) return false;
+      return true;
+    });
+    if(!dias.length) return;
+    var ag={}; HK.forEach(function(k){ag[k]=0;});
+    dias.forEach(function(d){HK.forEach(function(k){if(d[k]!==undefined) ag[k]+=d[k];});});
+    groups.push({r:r,dias:dias,ag:ag});
+  });
+
+  var tot={}; HK.forEach(function(k){tot[k]=0;});
+  groups.forEach(function(g){HK.forEach(function(k){tot[k]+=g.ag[k];});});
+  var totTurnos=groups.reduce(function(a,g){return a+g.dias.length;},0);
+
+  function dayRow(emp,d){
+    var cls=CICLO_CLS[d.ciclo]||'';
+    return '<tr class="'+cls+'">'
+      +'<td style="padding-left:1.4rem">'+emp+'</td><td class="text-center">'+d.dia+'</td><td class="text-center">'+fechaDMY(d.fecha)+'</td>'
+      +'<td class="text-center">'+d.dia_semana+'</td>'
+      +'<td class="text-center"><span class="badge t-'+d.turno+'" style="font-size:.72rem">'+d.turno+'</span></td>'
+      +'<td class="text-center"><span class="badge bg-secondary" style="font-size:.7rem">'+CICLO_LABEL[d.ciclo]+'</span></td>'
+      +'<td class="text-end">'+fmtH(d.acum_ini)+'</td>'
+      +'<td class="text-end fw-bold">'+fmtH(d.total_rec)+'</td>'
+      +'<td class="text-end">'+fmtH(d.rec_diurno)+'</td><td class="text-end">'+fmtH(d.rec_nocturno)+'</td>'
+      +'<td class="text-end">'+fmtH(d.rec_fest_d)+'</td><td class="text-end">'+fmtH(d.rec_fest_n)+'</td>'
+      +'<td class="text-end fw-bold">'+fmtH(d.total_ext)+'</td>'
+      +'<td class="text-end">'+fmtH(d.ext_diurna)+'</td><td class="text-end">'+fmtH(d.ext_nocturna)+'</td>'
+      +'<td class="text-end">'+fmtH(d.ext_fest_d)+'</td><td class="text-end">'+fmtH(d.ext_fest_n)+'</td>'
+      +'<td class="text-end fw-bold">'+fmtH(d.total_hrs)+'</td>'
+      +'<td class="text-end">$'+fmt(d.valor_recargo)+'</td><td class="text-end">$'+fmt(d.valor_extra)+'</td>'
+      +'<td class="text-end fw-bold">$'+fmt(d.valor_total)+'</td></tr>';
+  }
+
+  var html='', listLen, startIdx, shown, totalPages;
+
+  if(DET_VIEW==='resumen'){
+    listLen=groups.length;
+    totalPages=Math.max(1,Math.ceil(listLen/PAGE_SIZE));
+    if(DET_PAGE>totalPages) DET_PAGE=totalPages; if(DET_PAGE<1) DET_PAGE=1;
+    startIdx=(DET_PAGE-1)*PAGE_SIZE;
+    var pg=groups.slice(startIdx,startIdx+PAGE_SIZE);
+    shown=pg.length;
+    pg.forEach(function(g){
+      var a=g.ag, exp=!!DET_EXPANDED[g.r.id], chev=exp?'▾':'▸';
+      html+='<tr class="row-resumen" style="cursor:pointer;background:#eef3f9;font-weight:600" onclick="detToggleEmp('+g.r.id+')">'
+        +'<td><span style="display:inline-block;width:14px;color:#1F4E79">'+chev+'</span>'+g.r.nombre
+          +' <span class="badge bg-secondary" style="font-size:.66rem">'+g.dias.length+'</span></td>'
+        +'<td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td>'
+        +'<td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td></td>'
+        +'<td class="text-end">'+fmtH(a.total_rec)+'</td>'
+        +'<td class="text-end">'+fmtH(a.rec_diurno)+'</td><td class="text-end">'+fmtH(a.rec_nocturno)+'</td>'
+        +'<td class="text-end">'+fmtH(a.rec_fest_d)+'</td><td class="text-end">'+fmtH(a.rec_fest_n)+'</td>'
+        +'<td class="text-end">'+fmtH(a.total_ext)+'</td>'
+        +'<td class="text-end">'+fmtH(a.ext_diurna)+'</td><td class="text-end">'+fmtH(a.ext_nocturna)+'</td>'
+        +'<td class="text-end">'+fmtH(a.ext_fest_d)+'</td><td class="text-end">'+fmtH(a.ext_fest_n)+'</td>'
+        +'<td class="text-end fw-bold">'+fmtH(a.total_hrs)+'</td>'
+        +'<td class="text-end">$'+fmt(a.valor_recargo)+'</td><td class="text-end">$'+fmt(a.valor_extra)+'</td>'
+        +'<td class="text-end fw-bold">$'+fmt(a.valor_total)+'</td></tr>';
+      if(exp){ g.dias.forEach(function(d){ html+=dayRow(g.r.nombre,d); }); }
+    });
+    renderPager('det-pager',listLen,DET_PAGE,totalPages,startIdx,shown,function(p){DET_PAGE=p;renderDetalle();});
+  } else {
+    var rows=[];
+    groups.forEach(function(g){g.dias.forEach(function(d){rows.push({emp:g.r.nombre,d:d});});});
+    listLen=rows.length;
+    totalPages=Math.max(1,Math.ceil(listLen/PAGE_SIZE));
+    if(DET_PAGE>totalPages) DET_PAGE=totalPages; if(DET_PAGE<1) DET_PAGE=1;
+    startIdx=(DET_PAGE-1)*PAGE_SIZE;
+    var pr=rows.slice(startIdx,startIdx+PAGE_SIZE);
+    shown=pr.length;
+    pr.forEach(function(row){ html+=dayRow(row.emp,row.d); });
+    renderPager('det-pager',listLen,DET_PAGE,totalPages,startIdx,shown,function(p){DET_PAGE=p;renderDetalle();});
+  }
+  tbody.innerHTML=html;
+
+  tfoot.innerHTML='<tr class="tr-foot"><td colspan="6" class="text-center">TOTALES — '+totTurnos+' turnos · '+groups.length+' empleados</td>'
+    +'<td></td>'
+    +'<td class="text-end">'+fmtH(tot.total_rec)+'</td>'
+    +'<td class="text-end">'+fmtH(tot.rec_diurno)+'</td><td class="text-end">'+fmtH(tot.rec_nocturno)+'</td>'
+    +'<td class="text-end">'+fmtH(tot.rec_fest_d)+'</td><td class="text-end">'+fmtH(tot.rec_fest_n)+'</td>'
+    +'<td class="text-end">'+fmtH(tot.total_ext)+'</td>'
+    +'<td class="text-end">'+fmtH(tot.ext_diurna)+'</td><td class="text-end">'+fmtH(tot.ext_nocturna)+'</td>'
+    +'<td class="text-end">'+fmtH(tot.ext_fest_d)+'</td><td class="text-end">'+fmtH(tot.ext_fest_n)+'</td>'
+    +'<td class="text-end">'+fmtH(tot.total_hrs)+'</td>'
+    +'<td class="text-end">$'+fmt(tot.valor_recargo)+'</td><td class="text-end">$'+fmt(tot.valor_extra)+'</td>'
+    +'<td class="text-end">$'+fmt(tot.valor_total)+'</td></tr>';
+
+  var info=document.getElementById('det-info');
+  info.style.display='block';
+  document.getElementById('det-count').textContent=totTurnos;
+}
+
+// ─── Init ───
+// ─── Catálogo de turnos parametrizable ───
+var CATALOGO_DEFAULT=[
+  {cod:"D", desc:"Diurno",            ini:"06:00",paga:"SI",aux:"SI", gen:"SI"},
+  {cod:"N", desc:"Nocturno",          ini:"18:00",paga:"SI",aux:"SI", gen:"SI"},
+  {cod:"X", desc:"Descanso",          ini:"—",    paga:"NO",aux:"NO", gen:"NO"},
+  {cod:"FD",desc:"Festivo diurno",    ini:"06:00",paga:"SI",aux:"NO", gen:"SI"},
+  {cod:"FN",desc:"Festivo nocturno",  ini:"18:00",paga:"SI",aux:"NO", gen:"SI"},
+  {cod:"AD",desc:"Adicional diurno",  ini:"06:00",paga:"NO",aux:"NO", gen:"SI"},
+  {cod:"AN",desc:"Adicional nocturno",ini:"18:00",paga:"NO",aux:"NO", gen:"SI"},
+  {cod:"IN",desc:"Incapacidad",       ini:"—",    paga:"NO",aux:"NO", gen:"NO"},
+  {cod:"VC",desc:"Vacaciones",        ini:"—",    paga:"SI",aux:"NO", gen:"NO"},
+  {cod:"P", desc:"Permiso",           ini:"—",    paga:"SI",aux:"NO", gen:"NO"},
+  {cod:"AU",desc:"Ausencia",          ini:"—",    paga:"NO",aux:"NO", gen:"NO"},
+  {cod:"LC",desc:"Licencia",          ini:"—",    paga:"SI",aux:"NO", gen:"NO"},
+  {cod:"ID",desc:"Induccion dia",     ini:"06:00",paga:"SI",aux:"SI", gen:"SI"},
+  {cod:"RT",desc:"Retiro",            ini:"—",    paga:"NO",aux:"NO", gen:"NO"},
+  {cod:"CV",desc:"Comp. votaciones",  ini:"—",    paga:"SI",aux:"NO", gen:"NO"},
+  {cod:"DE",desc:"Dia de escolta",    ini:"06:00",paga:"SI",aux:"SI", gen:"SI"},
+  {cod:"PS",desc:"Psicofisico",       ini:"—",    paga:"SI",aux:"NO", gen:"NO"},
+];
+
+function renderCatalogTurnos(){
+  var tbody=document.getElementById('tbody-turnos-cat');
+  if(!tbody) return;
+  var tp=S.params.turno_params||{};
+  tbody.innerHTML=CATALOGO_DEFAULT.map(function(t){
+    var o=tp[t.cod]||{};
+    var paga=(o.paga_dia!==undefined)?(o.paga_dia?"SI":"NO"):t.paga;
+    var aux =(o.aux_transp!==undefined)?(o.aux_transp?"SI":"NO"):t.aux;
+    function pill(val,cod,campo){
+      return '<button class="f-pill'+(val==="SI"?" active":"")+'" '
+        +'style="font-size:.72rem;padding:2px 9px;border-radius:14px" '
+        +'onclick="toggleTurnoPill(this,\''+cod+'\',\''+campo+'\')">'+val+'</button>';
+    }
+    return '<tr>'
+      +'<td class="text-center fw-bold">'+t.cod+'</td>'
+      +'<td>'+t.desc+'</td>'
+      +'<td class="text-center text-muted" style="font-size:.78rem">'+t.ini+'</td>'
+      +'<td class="text-center">'+pill(paga,t.cod,"paga_dia")+'</td>'
+      +'<td class="text-center">'+pill(aux,t.cod,"aux_transp")+'</td>'
+      +'<td class="text-center '+(t.gen==="SI"?"text-success fw-bold":"text-muted")+'">'+t.gen+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function toggleTurnoPill(btn,cod,campo){
+  var active=btn.classList.toggle('active');
+  btn.textContent=active?"SI":"NO";
+  if(!S.params.turno_params) S.params.turno_params={};
+  if(!S.params.turno_params[cod]) S.params.turno_params[cod]={};
+  S.params.turno_params[cod][campo]=active;
+  saveParams(true);
+}
+
+['p-anio','p-mes','p-dias-ciclo','p-horas-obj','p-horas-turno','p-ini-noc','p-fin-noc','p-horas-mes']
+  .forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.addEventListener('change',function(){saveParams();});
+  });
+
+(function(){
+  var rs=document.getElementById('res-search');
+  if(rs) rs.addEventListener('input',function(){RES_SEARCH=rs.value;RES_PAGE=1;renderResultados();});
+  var ds=document.getElementById('det-search');
+  if(ds) ds.addEventListener('input',function(){DET_SEARCH=ds.value;DET_PAGE=1;renderDetalle();});
+  var es=document.getElementById('emp-search');
+  if(es) es.addEventListener('input',function(){EMP_SEARCH=es.value;EMP_PAGE=1;renderEmpleados();});
+})();
+
+fetch('/api/defaults').then(function(r){return r.json();}).then(function(d){
+  applyData(d);
+}).catch(function(){renderReglas();renderCalendario();renderEmpleados();});
+</script>
+</body>
+</html>

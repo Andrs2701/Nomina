@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: nomina-liquidacion
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app --workers 2 --timeout 120
+    envVars:
+      - key: DB_PATH
+        value: /data/nomina.db
+    disk:
+      name: nomina-data
+      mountPath: /data
+      sizeGB: 1

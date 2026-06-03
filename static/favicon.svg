@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#1F4E79"/>
+  <rect x="38" y="0" width="26" height="26" fill="#2E75B6" clip-path="url(#cr)"/>
+  <clipPath id="cr"><rect width="64" height="64" rx="12"/></clipPath>
+  <rect x="0" y="38" width="26" height="26" fill="#2E75B6" clip-path="url(#cr)"/>
+  <text x="32" y="50" font-family="Georgia,serif" font-size="46" font-weight="700" fill="white" text-anchor="middle">N</text>
+  <rect x="18" y="52" width="28" height="3" rx="1.5" fill="#4FC3F7"/>
+</svg>

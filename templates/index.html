@@ -3,618 +3,1168 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Liquidación Nómina · Seguridad</title>
+<title>NominaFlex CST · Nómina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <style>
-:root{--azul:#1F4E79;--azul-med:#2E75B6;--azul-cl:#DEEAF1;}
-body{background:#f4f6fb;font-size:.88rem;}
-.navbar{background:var(--azul)!important;}
-.navbar-brand{font-weight:700;letter-spacing:.5px;}
-.nav-tabs .nav-link.active{border-color:var(--azul-med) var(--azul-med) #fff;color:var(--azul);font-weight:600;}
-.nav-tabs .nav-link{color:#555;}
-.card{border-radius:10px;border:none;box-shadow:0 2px 8px rgba(0,0,0,.08);}
-/* Acordeón Parámetros */
-.acc-item{border:none;margin-bottom:.5rem;}
-.acc-btn{background:var(--azul);color:#fff;font-weight:600;border-radius:8px!important;padding:.7rem 1rem;}
-.acc-btn:not(.collapsed){background:var(--azul-med);color:#fff;border-radius:8px 8px 0 0!important;}
-.acc-btn::after{filter:invert(1);}
-.acc-btn:focus{box-shadow:none;}
-.acc-body{border:1px solid #dce6f4;border-top:none;border-radius:0 0 8px 8px;background:#fff;padding:1rem;}
-label.form-label{font-weight:500;color:#333;}
-.form-control,.form-select{font-size:.85rem;}
-/* Empleados */
-#tbl-empleados{table-layout:fixed;min-width:2100px;}
-#tbl-empleados th,#tbl-empleados td{padding:3px 4px;white-space:nowrap;vertical-align:middle;}
-#tbl-empleados input[type=text]{width:38px;text-align:center;font-size:.78rem;padding:2px;text-transform:uppercase;}
-#tbl-empleados input.emp-field{width:100%;font-size:.82rem;}
+:root{
+  --bg:#f8f9ff;
+  --surface:#ffffff;
+  --surface-soft:#eef4ff;
+  --surface-soft-2:#dfe9ff;
+  --border:#d7deec;
+  --ink:#0b1c30;
+  --muted:#536076;
+  --muted-2:#7a8497;
+  --primary:#000000;
+  --primary-soft:#e1ebff;
+  --primary-2:#d5e3fd;
+  --success:#1f7a3f;
+  --warning:#b36b00;
+  --danger:#ba1a1a;
+  --shadow:0 14px 40px rgba(15,23,42,.06);
+}
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(circle at top right, rgba(214,226,255,.85), transparent 28%),
+    radial-gradient(circle at 12% 8%, rgba(225,235,255,.9), transparent 22%),
+    var(--bg);
+  color:var(--ink);
+  font-family:"Inter",sans-serif;
+  font-size:.92rem;
+}
+a{text-decoration:none}
+.app-shell{display:flex;min-height:100vh}
+.sidebar{
+  width:278px;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(18px);
+  border-right:1px solid var(--border);
+  padding:1.4rem 1rem 1rem;
+  display:flex;
+  flex-direction:column;
+  position:sticky;
+  top:0;
+  height:100vh;
+  transition:width .18s ease, padding .18s ease;
+  position:sticky;
+}
+.sidebar-wrap{
+  position:relative;
+}
+.sidebar.collapsed{
+  width:86px;
+  padding:1.2rem .6rem .8rem;
+}
+.sidebar.collapsed .brand{
+  justify-content:center;
+}
+.sidebar.collapsed .brand h1,
+.sidebar.collapsed .brand p,
+.sidebar.collapsed .app-nav-link span,
+.sidebar.collapsed .sidebar-footer .sidebar-actions{
+  display:none;
+}
+.sidebar.collapsed .app-nav-link{
+  justify-content:center;
+  padding:.82rem .6rem;
+}
+.sidebar.collapsed .sidebar-footer{
+  align-items:center;
+}
+.sidebar.collapsed .toggle-label{
+  width:100%;
+  font-size:.78rem;
+  padding:.55rem .6rem;
+}
+.brand{
+  display:flex;align-items:center;gap:.85rem;
+  padding:.3rem .25rem 1.2rem;margin-bottom:1rem;
+  border-bottom:1px solid var(--border);
+}
+.brand-mark{
+  width:44px;height:44px;border-radius:14px;
+  background:linear-gradient(145deg,#0b1c30,#1f4e79 70%,#2e75b6);
+  color:#fff;display:grid;place-items:center;font-weight:800;
+  letter-spacing:.08em;box-shadow:0 10px 20px rgba(31,78,121,.22);
+}
+.brand h1{font-size:1.05rem;font-weight:800;margin:0;line-height:1.1}
+.brand p{margin:0;color:var(--muted);font-size:.8rem}
+.app-nav{gap:.35rem}
+.app-nav-link{
+  display:flex;align-items:center;gap:.8rem;
+  color:var(--muted);border-radius:14px;
+  padding:.82rem .95rem;border:1px solid transparent;
+  transition:all .16s ease;
+}
+.app-nav-link i{font-size:1.05rem}
+.app-nav-link:hover{
+  background:rgba(223,233,255,.7);
+  color:var(--ink);
+  border-color:rgba(215,222,236,.75);
+}
+.app-nav-link.active{
+  background:linear-gradient(90deg,#dbe7ff 0%, #e8f0ff 100%);
+  color:var(--ink);
+  border-color:rgba(137,164,214,.25);
+  box-shadow:inset 3px 0 0 #0b1c30;
+  font-weight:700;
+}
+.sidebar-footer{
+  margin-top:auto;padding-top:1rem;border-top:1px solid var(--border);display:grid;gap:.8rem
+}
+.sidebar-actions{display:grid;gap:.55rem}
+.main-shell{flex:1;min-width:0}
+.topbar{
+  position:sticky;top:0;z-index:40;
+  height:80px;padding:0 1.7rem;
+  background:rgba(248,249,255,.82);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+}
+.topbar-left{display:flex;align-items:center;gap:1rem;min-width:0}
+.eyebrow{
+  font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:.2rem;font-weight:700
+}
+.topbar h2{margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em}
+.topbar-search{
+  min-width:min(480px,42vw);
+  display:flex;align-items:center;gap:.65rem;
+  background:rgba(255,255,255,.82);
+  border:1px solid var(--border);
+  border-radius:16px;padding:.72rem .95rem;
+  box-shadow:0 8px 24px rgba(15,23,42,.04);
+}
+.topbar-search i{font-size:1.03rem;color:var(--muted)}
+.topbar-search input{
+  border:none;background:transparent;outline:none;width:100%;
+  font-size:.94rem;color:var(--ink)
+}
+.topbar-actions{display:flex;align-items:center;gap:.7rem}
+.period-chip{
+  display:inline-flex;align-items:center;
+  padding:.4rem .7rem;border-radius:999px;
+  background:var(--primary-soft);border:1px solid #c7d7ff;
+  color:var(--ink);font-weight:700;font-size:.8rem;
+}
+.icon-btn{
+  width:42px;height:42px;border:none;border-radius:14px;
+  display:grid;place-items:center;background:transparent;color:var(--ink);
+}
+.icon-btn:hover{background:rgba(223,233,255,.8)}
+.sidebar-toggle-fab{
+  position:absolute;
+  top:88px;
+  right:-14px;
+  width:28px;
+  height:56px;
+  border:1px solid var(--border);
+  border-left:none;
+  background:rgba(255,255,255,.95);
+  box-shadow:0 8px 24px rgba(15,23,42,.08);
+  border-radius:0 18px 18px 0;
+  display:grid;
+  place-items:center;
+  color:#0b1c30;
+  z-index:20;
+}
+.sidebar-toggle-fab:hover{background:#eef4ff}
+.sidebar-toggle-fab i{font-size:1.05rem}
+.content-wrap{padding:1.65rem 1.7rem 2rem;max-width:1600px}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.2rem}
+.page-kicker{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.35rem}
+.page-title{font-size:2rem;line-height:1.05;font-weight:800;letter-spacing:-.03em;margin:0}
+.page-subtitle{color:var(--muted);margin:.35rem 0 0;max-width:76ch}
+.panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:22px;
+  box-shadow:var(--shadow);
+}
+.panel-soft{background:linear-gradient(180deg,#fff, #fbfcff)}
+.panel-pad{padding:1.3rem}
+.panel-header{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:1.1rem 1.2rem;border-bottom:1px solid var(--border)
+}
+.panel-title{margin:0;font-size:1.02rem;font-weight:800}
+.panel-sub{margin:0;color:var(--muted);font-size:.84rem}
+.kpi-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
+.kpi-card{
+  grid-column:span 3;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:1rem 1rem 1.1rem;
+  box-shadow:0 8px 20px rgba(15,23,42,.04);
+  min-height:132px;
+}
+.kpi-card .kpi-top{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin-bottom:.9rem}
+.kpi-ico{
+  width:48px;height:48px;border-radius:14px;display:grid;place-items:center;
+  background:#e3ebff;color:#22314a;font-size:1.2rem
+}
+.kpi-trend{
+  font-size:.78rem;font-weight:700;border-radius:999px;padding:.25rem .5rem;
+  background:#eef7f0;color:var(--success)
+}
+.kpi-label{color:var(--muted);font-size:.88rem;margin-bottom:.3rem}
+.kpi-value{font-size:1.85rem;line-height:1.05;font-weight:800;letter-spacing:-.03em;margin:0}
+.kpi-foot{margin-top:.45rem;color:var(--muted);font-size:.8rem}
+.hero-grid{display:grid;grid-template-columns:2.15fr .95fr;gap:1rem;align-items:stretch;margin-bottom:1rem}
+.hero-panel{
+  padding:1.6rem;
+  min-height:260px;
+  position:relative;overflow:hidden;
+  background:
+    radial-gradient(circle at right top, rgba(255,255,255,.16), transparent 32%),
+    linear-gradient(135deg,#0b1c30 0%, #1f4e79 48%, #2e75b6 100%);
+  color:#fff;border:none;
+  box-shadow:0 18px 38px rgba(31,78,121,.2);
+}
+.hero-panel::after{
+  content:"";position:absolute;right:-90px;top:-70px;width:250px;height:250px;border-radius:50%;
+  background:rgba(255,255,255,.08)
+}
+.hero-panel::before{
+  content:"";position:absolute;right:90px;bottom:-110px;width:220px;height:220px;border-radius:50%;
+  background:rgba(255,255,255,.05)
+}
+.hero-inner{position:relative;z-index:1;max-width:760px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.38rem .8rem;border-radius:999px;
+  background:rgba(255,255,255,.13);
+  border:1px solid rgba(255,255,255,.18);
+  font-size:.78rem;font-weight:700;margin-bottom:1rem
+}
+.hero-title{font-size:2.3rem;line-height:1.02;font-weight:800;letter-spacing:-.04em;margin:0 0 .8rem}
+.hero-sub{font-size:1rem;line-height:1.7;opacity:.92;max-width:62ch;margin:0 0 1.2rem}
+.hero-actions{display:flex;flex-wrap:wrap;gap:.75rem}
+.hero-actions .btn{border-radius:14px;padding:.78rem 1rem;font-weight:700}
+.hero-stats{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.2rem}
+.stat-pill{
+  min-width:154px;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;
+  padding:.8rem .9rem;
+}
+.stat-pill span{display:block;font-size:.75rem;opacity:.82;margin-bottom:.15rem}
+.stat-pill strong{font-size:1.1rem}
+.hero-side{display:grid;gap:1rem}
+.hero-side .panel{padding:1rem}
+.hero-mini{
+  padding:1rem;
+  border-radius:18px;
+  background:linear-gradient(180deg,#ffffff 0%, #f7faff 100%);
+}
+.hero-mini h5{margin:0 0 .7rem;font-size:1rem;font-weight:800}
+.hero-mini p{color:var(--muted);font-size:.85rem;line-height:1.5;margin:0}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1rem}
+.quick-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:18px;
+  padding:1rem;box-shadow:0 8px 20px rgba(15,23,42,.04);height:100%;
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.quick-card:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(31,78,121,.12);border-color:#c9d6ee}
+.quick-ico{
+  width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+  font-size:1.2rem;margin-bottom:.9rem
+}
+.quick-card h6{font-weight:800;margin-bottom:.3rem;color:#16335c}
+.quick-card p{margin:0;color:var(--muted);font-size:.84rem;line-height:1.5}
+.section-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:1rem;align-items:start}
+.stack{display:grid;gap:1rem}
+.glass-card{
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(215,222,236,.8);
+}
+.accent-card{background:linear-gradient(180deg,#0f172a, #1b2741);color:#fff;padding:.95rem}
+.accent-card .panel-title,.accent-card .panel-sub,.accent-card .kpi-label,.accent-card p{color:#fff}
+.accent-card .muted{color:rgba(255,255,255,.72)!important}
+.soft-note{
+  background:linear-gradient(180deg,#fef4df,#fae3b7);
+  border:1px solid #f1d39c;border-radius:18px;padding:.85rem .9rem
+}
+.soft-note h5{font-size:.92rem;font-weight:800;margin:0 0 .3rem}
+.soft-note p{margin:0;color:#5d4625;line-height:1.45;font-size:.8rem}
+.params-side{display:grid;gap:1rem;align-self:start}
+.section-shell{padding:1rem}
+.section-shell .panel{overflow:hidden}
+.section-shell .panel-header{background:linear-gradient(180deg,#fff, #f8fbff)}
+.subtle-head{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap
+}
+.subtle-head .btn{border-radius:14px;font-weight:700}
+.drop-zone{
+  border:1.5px dashed #93aed8;
+  border-radius:20px;
+  padding:2rem 1rem;
+  background:linear-gradient(180deg,#f2f7ff,#eaf2ff);
+  cursor:pointer;
+  transition:all .15s ease;
+  text-align:center;
+}
+.drop-zone.drag-over{background:#e0ebff;border-color:#1f4e79}
+.drop-zone i{font-size:2.9rem;color:#1f4e79;opacity:.9}
+.drop-zone .drop-title{font-weight:800;color:#16335c;margin:.8rem 0 .25rem}
+.drop-zone .drop-sub{color:var(--muted);font-size:.82rem;margin:0 0 .8rem}
+.mini-action{
+  width:100%;
+  border-radius:14px;
+  padding:.82rem 1rem;
+  font-weight:800;
+}
+.mini-action.btn-dark{background:#000;border-color:#000}
+.mini-action.btn-outline-dark{border-color:#000;color:#000}
+.mini-action.btn-outline-dark:hover{background:#000;color:#fff}
+.spinner-overlay{
+  display:none;position:fixed;inset:0;background:rgba(11,28,48,.48);z-index:9999;
+  align-items:center;justify-content:center;backdrop-filter:blur(4px)
+}
+.spinner-overlay.show{display:flex}
+.toast-container{position:fixed;bottom:1rem;right:1rem;z-index:10000}
+.tbl-scroll{max-height:64vh;overflow:auto;border:1px solid var(--border);border-radius:18px;background:#fff}
+.tbl-scroll table{margin-bottom:0}
+.tbl-scroll thead th{position:sticky;top:0;z-index:3}
+.tbl-scroll thead tr:nth-child(2) th{top:31px}
+.tbl-sticky1 thead tr:first-child th:first-child,
+.tbl-sticky1 tbody td:first-child,
+.tbl-sticky1 tfoot td:first-child{position:sticky;left:0;z-index:2;background:#fff;box-shadow:1px 0 0 var(--border)}
+.tbl-sticky1 thead tr:first-child th:first-child{z-index:5}
+.tbl-scroll tbody tr:hover td{background:#eef5ff!important}
+.pager{display:flex;align-items:center;gap:.6rem;margin-top:.6rem;font-size:.82rem;flex-wrap:wrap}
+.pager .btn{padding:1px 10px;border-radius:10px}
+.search-box{max-width:280px}
+.toolbar{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  margin-bottom:1rem
+}
+.toolbar .btn{border-radius:14px;font-weight:700}
+.toolbar .input-group{max-width:320px}
+.alert-surface{
+  border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:0 8px 20px rgba(15,23,42,.04)
+}
+.acc-item{border:none;margin-bottom:.75rem;background:transparent}
+.acc-btn{
+  background:#f5f8ff;color:#0b1c30;font-weight:800;border-radius:16px!important;
+  padding:.95rem 1.05rem;border:1px solid var(--border)
+}
+.acc-btn:not(.collapsed){
+  background:linear-gradient(90deg,#dce8ff,#edf3ff);
+  color:#0b1c30;border-color:#bfd0f3;border-radius:16px 16px 0 0!important
+}
+.acc-btn::after{filter:none}
+.acc-btn:focus{box-shadow:none}
+.acc-body{
+  border:1px solid var(--border);border-top:none;border-radius:0 0 16px 16px;
+  background:#fff;padding:1.1rem
+}
+label.form-label{font-weight:600;color:#243146;margin-bottom:.35rem}
+.form-control,.form-select{font-size:.9rem;border-radius:14px;border-color:#cfd7e6}
+.form-control:focus,.form-select:focus{border-color:#8aaae6;box-shadow:0 0 0 .2rem rgba(31,78,121,.08)}
+#tbl-empleados{table-layout:fixed;min-width:2100px}
+#tbl-empleados th,#tbl-empleados td{padding:4px 5px;white-space:nowrap;vertical-align:middle}
+#tbl-empleados input[type=text]{width:40px;text-align:center;font-size:.78rem;padding:2px;text-transform:uppercase}
+#tbl-empleados input.emp-field{width:100%;font-size:.82rem}
 .t-D{background:#d1ecf1!important;}.t-N{background:#cce5ff!important;}
 .t-X{background:#f8f9fa!important;color:#aaa;}
 .t-FD{background:#fff3cd!important;}.t-FN{background:#ffe0b2!important;}
 .t-AD{background:#d4edda!important;}.t-AN{background:#c3e6cb!important;}
-/* Resultados */
-#tbl-resultados th{background:var(--azul);color:#fff;font-size:.75rem;text-align:center;white-space:normal;line-height:1.2;}
-#tbl-resultados th.th-ant{background:#1F4E79;}
-#tbl-resultados th.th-act{background:#2E75B6;}
-#tbl-resultados th.th-pos{background:#155724;}
-#tbl-resultados th.th-rec-ant{background:#2c6a9e;}
-#tbl-resultados th.th-ext-ant{background:#3a7abf;}
-#tbl-resultados th.th-rec-act{background:#1d6fa0;}
-#tbl-resultados th.th-ext-act{background:#2585c0;}
-#tbl-resultados th.th-rec-pos{background:#1a6b35;}
-#tbl-resultados th.th-ext-pos{background:#218838;}
-#tbl-resultados td{font-size:.78rem;vertical-align:middle;}
-#tbl-resultados tr:nth-child(even) td{background:#f7fafe;}
-#tbl-resultados .tr-total td{background:#c6efce;font-weight:700;}
+#tbl-resultados th{background:#0b1c30;color:#fff;font-size:.75rem;text-align:center;white-space:normal;line-height:1.2}
+#tbl-resultados th.th-ant{background:#1F4E79}
+#tbl-resultados th.th-act{background:#2E75B6}
+#tbl-resultados th.th-pos{background:#155724}
+#tbl-resultados th.th-rec-ant{background:#2c6a9e}
+#tbl-resultados th.th-ext-ant{background:#3a7abf}
+#tbl-resultados th.th-rec-act{background:#1d6fa0}
+#tbl-resultados th.th-ext-act{background:#2585c0}
+#tbl-resultados th.th-rec-pos{background:#1a6b35}
+#tbl-resultados th.th-ext-pos{background:#218838}
+#tbl-resultados td{font-size:.78rem;vertical-align:middle}
+#tbl-resultados tr:nth-child(even) td{background:#f7fafe}
+#tbl-resultados .tr-total td{background:#dce8ff;font-weight:800}
 .td-ant{background:#eaf3fb!important;}
 .td-act{background:#e8f4ff!important;}
 .td-pos{background:#eafbee!important;}
-/* Calendario */
-.cal-nav-btn{border:none;background:none;font-size:1.1rem;padding:2px 10px;cursor:pointer;color:#fff;}
-.cal-nav-btn:hover{background:rgba(255,255,255,.15);border-radius:4px;}
-.cal-year-display{font-weight:700;font-size:1rem;}
-.cal-mes{background:#fff;border-radius:8px;padding:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
-.cal-mes h6{background:var(--azul);color:#fff;border-radius:5px;padding:4px 8px;font-size:.8rem;margin-bottom:6px;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:.72rem;}
-.cal-grid .cal-dow{text-align:center;font-weight:600;color:#777;padding:2px;}
-.cal-grid .cal-day{text-align:center;padding:3px 1px;border-radius:4px;cursor:default;min-height:22px;line-height:18px;}
-.cal-day.festivo{background:#ffc107;color:#000;font-weight:700;cursor:pointer;}
-.cal-day.domingo{color:#dc3545;font-weight:600;}
-.cal-day.vacio{background:transparent;}
-.cal-day:not(.vacio):not(.festivo):hover{background:#e8f0fe;}
-/* Detalle */
-#tbl-detalle th{background:var(--azul);color:#fff;font-size:.75rem;text-align:center;white-space:nowrap;}
-#tbl-detalle td{font-size:.76rem;vertical-align:middle;white-space:nowrap;}
-#tbl-detalle tr:nth-child(even) td{background:#f7fafe;}
-#tbl-detalle .tr-foot td{background:#1F4E79;color:#fff;font-weight:700;}
+.cal-nav-btn{border:none;background:none;font-size:1.1rem;padding:2px 10px;cursor:pointer;color:#fff}
+.cal-nav-btn:hover{background:rgba(255,255,255,.15);border-radius:8px}
+.cal-year-display{font-weight:800;font-size:.98rem}
+.cal-mes{
+  background:#fff;border-radius:18px;padding:10px;
+  border:1px solid var(--border);box-shadow:0 8px 20px rgba(15,23,42,.04)
+}
+.cal-mes h6{
+  background:#0b1c30;color:#fff;border-radius:12px;padding:6px 10px;font-size:.8rem;margin-bottom:8px
+}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:.72rem}
+.cal-grid .cal-dow{text-align:center;font-weight:700;color:#6b7280;padding:2px}
+.cal-grid .cal-day{text-align:center;padding:4px 1px;border-radius:8px;cursor:default;min-height:24px;line-height:18px}
+.cal-day.festivo{background:#ffc107;color:#000;font-weight:800;cursor:pointer}
+.cal-day.domingo{color:#dc3545;font-weight:700}
+.cal-day.vacio{background:transparent}
+.cal-day:not(.vacio):not(.festivo):hover{background:#e8f0fe}
+#tbl-detalle th{background:#0b1c30;color:#fff;font-size:.75rem;text-align:center;white-space:nowrap}
+#tbl-detalle td{font-size:.76rem;vertical-align:middle;white-space:nowrap}
+#tbl-detalle tr:nth-child(even) td{background:#f7fafe}
+#tbl-detalle .tr-foot td{background:#0b1c30;color:#fff;font-weight:800}
 .ciclo-ant{background:#eaf3fb!important;}
 .ciclo-act{background:#e8f4ff!important;}
 .ciclo-pos{background:#eafbee!important;}
-/* Filtros pill-style */
-.filter-bar{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;
-  background:#fff;border-radius:10px;padding:12px 16px;
-  box-shadow:0 1px 6px rgba(0,0,0,.08);margin-bottom:0;}
-.f-group{display:flex;flex-direction:column;gap:5px;}
-.f-group-label{font-size:.72rem;font-weight:700;color:#555;text-transform:uppercase;
-  letter-spacing:.4px;}
-.f-pills{display:flex;flex-wrap:wrap;gap:5px;}
-.f-pill{border:1.5px solid var(--azul-med);background:#fff;color:var(--azul);
-  border-radius:20px;padding:3px 12px;font-size:.78rem;font-weight:500;
-  cursor:pointer;transition:all .15s;line-height:1.4;white-space:nowrap;}
-.f-pill:hover{background:#e8f3ff;border-color:var(--azul);}
-.f-pill.active{background:var(--azul);color:#fff;border-color:var(--azul);}
-/* Dropdown empleado */
-.f-dropdown{position:relative;}
-.f-dropdown-btn{border:1.5px solid var(--azul-med);background:#fff;color:var(--azul);
-  border-radius:8px;padding:4px 12px;font-size:.8rem;font-weight:500;
+.filter-bar{
+  display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;
+  background:#fff;border:1px solid var(--border);border-radius:18px;padding:12px 14px;
+  box-shadow:0 8px 20px rgba(15,23,42,.04);margin-bottom:0
+}
+.f-group{display:flex;flex-direction:column;gap:5px}
+.f-group-label{font-size:.72rem;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.04em}
+.f-pills{display:flex;flex-wrap:wrap;gap:5px}
+.f-pill{
+  border:1.5px solid #8faade;background:#fff;color:#0b1c30;
+  border-radius:999px;padding:3px 12px;font-size:.78rem;font-weight:600;
+  cursor:pointer;transition:all .15s;line-height:1.4;white-space:nowrap
+}
+.f-pill:hover{background:#e8f3ff;border-color:#2e75b6}
+.f-pill.active{background:#0b1c30;color:#fff;border-color:#0b1c30}
+.f-dropdown{position:relative}
+.f-dropdown-btn{
+  border:1.5px solid #8faade;background:#fff;color:#0b1c30;
+  border-radius:14px;padding:4px 12px;font-size:.8rem;font-weight:600;
   cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;
-  transition:all .15s;min-width:130px;}
-.f-dropdown-btn:hover{background:#e8f3ff;}
-.f-dropdown-btn.open{background:var(--azul);color:#fff;border-color:var(--azul);}
-.f-dropdown-btn .f-cnt{background:#ffc107;color:#000;border-radius:10px;
-  padding:1px 6px;font-size:.7rem;font-weight:700;}
-.f-dropdown-menu{display:none;position:absolute;top:calc(100% + 4px);left:0;
-  background:#fff;border:1px solid #dce6f4;border-radius:8px;
-  box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:200;min-width:200px;
-  max-height:220px;overflow-y:auto;padding:6px 0;}
-.f-dropdown-menu.show{display:block;}
-.f-chk-item{display:flex;align-items:center;gap:8px;padding:5px 12px;
-  cursor:pointer;font-size:.82rem;transition:background .1s;}
-.f-chk-item:hover{background:#f0f7ff;}
-.f-chk-item input[type=checkbox]{accent-color:var(--azul);width:14px;height:14px;cursor:pointer;}
-.f-chk-item label{cursor:pointer;margin:0;flex:1;}
-.f-info{display:flex;align-items:center;gap:4px;font-size:.78rem;
-  color:#666;align-self:flex-end;padding-bottom:4px;}
-.drop-zone{border:2px dashed var(--azul-med);border-radius:10px;padding:2rem 1rem;
-  background:#f0f7ff;cursor:pointer;transition:background .2s;text-align:center;}
-.drop-zone.drag-over{background:#deeaf1;border-color:var(--azul);}
-.spinner-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;
-  align-items:center;justify-content:center;}
-.spinner-overlay.show{display:flex;}
-.toast-container{position:fixed;bottom:1rem;right:1rem;z-index:10000;}
-/* ── Tablas grandes: scroll con encabezado fijo + columna fija ── */
-.tbl-scroll{max-height:64vh;overflow:auto;border:1px solid #e3e8ee;border-radius:8px;}
-.tbl-scroll table{margin-bottom:0;}
-.tbl-scroll thead th{position:sticky;top:0;z-index:3;}
-.tbl-scroll thead tr:nth-child(2) th{top:31px;}
-.tbl-sticky1 thead tr:first-child th:first-child,
-.tbl-sticky1 tbody td:first-child,
-.tbl-sticky1 tfoot td:first-child{position:sticky;left:0;z-index:2;background:#fff;box-shadow:1px 0 0 #e3e8ee;}
-.tbl-sticky1 thead tr:first-child th:first-child{z-index:5;}
-.tbl-scroll tbody tr:hover td{background:#eef5ff!important;}
-.pager{display:flex;align-items:center;gap:.6rem;margin-top:.6rem;font-size:.82rem;flex-wrap:wrap;}
-.pager .btn{padding:1px 10px;}
-.search-box{max-width:230px;}
-/* ── Página de inicio ── */
-.home-hero{border-radius:18px;padding:2.6rem 2rem;color:#fff;position:relative;overflow:hidden;
-  background:linear-gradient(120deg,#16335c 0%,#1F4E79 45%,#2E75B6 100%);
-  box-shadow:0 12px 30px rgba(31,78,121,.25);}
-.home-hero::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;
-  background:rgba(255,255,255,.07);}
-.home-hero::before{content:"";position:absolute;right:80px;bottom:-90px;width:200px;height:200px;border-radius:50%;
-  background:rgba(255,255,255,.05);}
-.home-hero-inner{position:relative;z-index:1;max-width:720px;}
-.home-badge{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
-  padding:4px 12px;border-radius:30px;font-size:.78rem;font-weight:600;margin-bottom:1rem;}
-.home-title{font-weight:800;font-size:2.1rem;letter-spacing:.3px;margin-bottom:.6rem;}
-.home-sub{font-size:1rem;opacity:.92;line-height:1.6;margin-bottom:1.4rem;}
-.home-cta{display:flex;gap:.8rem;flex-wrap:wrap;}
-.home-card{background:#fff;border:1px solid #e9eef4;border-radius:14px;padding:1.3rem;height:100%;cursor:pointer;
-  transition:transform .15s,box-shadow .15s,border-color .15s;}
-.home-card:hover{transform:translateY(-4px);box-shadow:0 10px 22px rgba(31,78,121,.13);border-color:#cddcec;}
-.home-ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;
-  font-size:1.3rem;margin-bottom:.8rem;}
-.home-card h6{font-weight:700;color:#1F4E79;margin-bottom:.35rem;}
-.home-card p{font-size:.84rem;color:#667;margin:0;line-height:1.45;}
-.home-feats{display:flex;flex-wrap:wrap;gap:1.2rem;margin:1.6rem .2rem .4rem;color:#445;font-size:.88rem;}
-.home-feats span i{color:#1a8c3d;margin-right:.3rem;}
+  transition:all .15s;min-width:130px
+}
+.f-dropdown-btn:hover{background:#e8f3ff}
+.f-dropdown-btn.open{background:#0b1c30;color:#fff;border-color:#0b1c30}
+.f-dropdown-btn .f-cnt{background:#ffc107;color:#000;border-radius:10px;padding:1px 6px;font-size:.7rem;font-weight:800}
+.f-dropdown-menu{
+  display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid var(--border);
+  border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.12);z-index:200;min-width:220px;
+  max-height:220px;overflow-y:auto;padding:6px 0
+}
+.f-dropdown-menu.show{display:block}
+.f-chk-item{display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:.82rem;transition:background .1s}
+.f-chk-item:hover{background:#f0f7ff}
+.f-chk-item input[type=checkbox]{accent-color:#0b1c30;width:14px;height:14px;cursor:pointer}
+.f-chk-item label{cursor:pointer;margin:0;flex:1}
+.f-info{display:flex;align-items:center;gap:4px;font-size:.78rem;color:#55606f;align-self:flex-end;padding-bottom:4px}
+.result-head{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:end;margin-bottom:1rem
+}
+.result-total{
+  background:linear-gradient(180deg,#0b1c30,#182748);
+  color:#fff;border-radius:22px;padding:1.1rem 1.2rem;box-shadow:0 16px 34px rgba(11,28,48,.18)
+}
+.result-total .muted{color:rgba(255,255,255,.68)!important}
+.result-total .value{font-size:2rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.result-mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1rem}
+.result-mini{
+  background:#fff;border:1px solid var(--border);border-radius:18px;padding:1rem;box-shadow:0 8px 20px rgba(15,23,42,.04)
+}
+.result-mini .label{color:var(--muted);font-size:.8rem;margin-bottom:.25rem}
+.result-mini .value{font-size:1.2rem;font-weight:800}
+.muted-card{
+  background:linear-gradient(180deg,#f6f9ff,#eef4ff);
+  border:1px solid var(--border);border-radius:18px;padding:1rem
+}
+.muted-card .value{font-weight:800}
+@media (max-width: 1199.98px){
+  .kpi-card{grid-column:span 6}
+  .quick-grid{grid-template-columns:repeat(2,1fr)}
+  .hero-grid,.section-grid,.result-head{grid-template-columns:1fr}
+}
+@media (max-width: 991.98px){
+  .app-shell{flex-direction:column}
+  .sidebar{
+    position:relative;height:auto;width:100%;
+    border-right:none;border-bottom:1px solid var(--border)
+  }
+  .sidebar-toggle-fab{display:none}
+  .topbar{position:relative;height:auto;min-height:80px;flex-wrap:wrap;padding:1rem 1rem}
+  .topbar-search{min-width:100%;order:3}
+  .content-wrap{padding:1rem}
+}
+@media (max-width: 767.98px){
+  body{font-size:.88rem}
+  .topbar h2,.page-title,.hero-title{font-size:1.5rem}
+  .kpi-card{grid-column:span 12}
+  .quick-grid,.result-mini-grid{grid-template-columns:1fr}
+  .hero-panel{padding:1.2rem}
+  .hero-title{font-size:1.8rem}
+  .hero-actions .btn,.toolbar .btn{width:100%}
+  .hero-actions,.toolbar,.subtle-head{width:100%}
+}
 </style>
-  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-  <link rel="shortcut icon" href="/static/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=2">
+<link rel="shortcut icon" href="/static/favicon.svg?v=2">
 </head>
 <body>
-<nav class="navbar navbar-dark py-2">
-  <div class="container-fluid">
-    <span class="navbar-brand"><i class="bi bi-shield-lock-fill me-2"></i>Sistema de Liquidación de Nómina</span>
-    <button class="btn btn-warning btn-sm fw-bold" id="btn-calcular">
-      <i class="bi bi-calculator me-1"></i>Calcular Nómina
+<div class="app-shell">
+  <div class="sidebar-wrap">
+    <button class="sidebar-toggle-fab" id="btn-sidebar-toggle" type="button" aria-label="Ocultar menú" title="Ocultar menú">
+      <i class="bi bi-chevron-left"></i>
     </button>
-  </div>
-</nav>
-<div class="spinner-overlay" id="spinner">
-  <div class="text-center text-white">
-    <div class="spinner-border mb-3" style="width:3rem;height:3rem"></div>
-    <div class="fw-bold fs-5">Calculando…</div>
-  </div>
-</div>
-<div class="toast-container" id="toast-container"></div>
-
-<div class="container-fluid py-3">
-<ul class="nav nav-tabs mb-3">
-  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-inicio"><i class="bi bi-house-door-fill me-1"></i>Inicio</a></li>
-  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-carga"><i class="bi bi-cloud-upload me-1"></i>Cargar Plantilla</a></li>
-  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-params"><i class="bi bi-sliders me-1"></i>Parámetros</a></li>
-  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-empleados"><i class="bi bi-people-fill me-1"></i>Empleados <span class="badge bg-secondary" id="cnt-emp">0</span></a></li>
-  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-resultados"><i class="bi bi-table me-1"></i>Resultados</a></li>
-  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-detalle"><i class="bi bi-search me-1"></i>Detalle</a></li>
-</ul>
-<div class="tab-content">
-
-<!-- ══ TAB INICIO ══ -->
-<div class="tab-pane fade show active" id="tab-inicio">
-  <div class="home-hero">
-    <div class="home-hero-inner">
-      <div class="home-badge"><i class="bi bi-shield-lock-fill me-1"></i>Personal de Seguridad</div>
-      <h1 class="home-title">Sistema de Liquidación de Nómina</h1>
-      <p class="home-sub">Calcula recargos, horas extras, festivos y auxilios de transporte de tu equipo en segundos. Carga tu plantilla, ajusta los parámetros y obtén la liquidación lista para exportar.</p>
-      <div class="home-cta">
-        <button class="btn btn-light btn-lg fw-bold" onclick="irA('tab-carga')"><i class="bi bi-cloud-upload me-2"></i>Cargar Plantilla</button>
-        <button class="btn btn-outline-light btn-lg" onclick="irA('tab-params')"><i class="bi bi-sliders me-2"></i>Configurar Parámetros</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="row g-3 mt-1">
-    <div class="col-lg-3 col-md-6">
-      <div class="home-card" onclick="irA('tab-carga')">
-        <div class="home-ico" style="background:#e8f1fb;color:#1F4E79"><i class="bi bi-cloud-upload"></i></div>
-        <h6>1. Carga tu plantilla</h6>
-        <p>Sube el Excel con los empleados y su matriz de turnos. También puedes descargar la plantilla base.</p>
-      </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-      <div class="home-card" onclick="irA('tab-params')">
-        <div class="home-ico" style="background:#eaf6ee;color:#1a6b35"><i class="bi bi-sliders"></i></div>
-        <h6>2. Ajusta parámetros</h6>
-        <p>Recargos, catálogo de turnos y festivos — todo configurable y guardado entre sesiones.</p>
-      </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-      <div class="home-card" onclick="irA('tab-empleados')">
-        <div class="home-ico" style="background:#fef3e6;color:#b9690b"><i class="bi bi-people-fill"></i></div>
-        <h6>3. Revisa empleados</h6>
-        <p>Edita la matriz de turnos con buscador y paginación, incluso con miles de empleados.</p>
-      </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-      <div class="home-card" onclick="document.getElementById('btn-calcular').click()">
-        <div class="home-ico" style="background:#fdeaea;color:#c0392b"><i class="bi bi-calculator"></i></div>
-        <h6>4. Calcula y exporta</h6>
-        <p>Obtén resultados y detalle por turno, y expórtalos a Excel para tus validaciones.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="home-feats">
-    <span><i class="bi bi-check-circle-fill"></i> Recargos y extras parametrizables</span>
-    <span><i class="bi bi-check-circle-fill"></i> Festivos de Colombia incluidos</span>
-    <span><i class="bi bi-check-circle-fill"></i> Cálculo por ciclos de 21 días</span>
-    <span><i class="bi bi-check-circle-fill"></i> Exportación a Excel</span>
-  </div>
-</div>
-
-<!-- ══ TAB CARGA ══ -->
-<div class="tab-pane fade" id="tab-carga">
-  <div class="row g-3">
-    <div class="col-lg-3 col-md-6">
-      <div class="card h-100">
-        <div class="card-header"><span class="badge bg-warning text-dark me-1">1</span> Descarga la plantilla</div>
-        <div class="card-body d-flex flex-column align-items-center justify-content-center text-center py-4">
-          <i class="bi bi-file-earmark-excel" style="font-size:3.5rem;color:#1F4E79;opacity:.85"></i>
-          <p class="mt-3 text-muted" style="font-size:.83rem">Plantilla Excel con instrucciones,<br>catálogo de turnos y estructura lista.</p>
-          <a href="/api/plantilla" class="btn btn-success mt-1" download><i class="bi bi-download me-2"></i>Descargar Plantilla</a>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-      <div class="card h-100">
-        <div class="card-header"><span class="badge bg-warning text-dark me-1">2</span> Llena los datos</div>
-        <div class="card-body" style="font-size:.83rem">
-          <p class="fw-bold mb-2 text-primary">Hoja <code>PLANTILLA_CARGA</code> — celdas amarillas:</p>
-          <table class="table table-sm table-bordered mb-2" style="font-size:.78rem">
-            <tr><td class="fw-bold">B</td><td>Nombre del empleado</td></tr>
-            <tr><td class="fw-bold">C</td><td>Salario mensual ($)</td></tr>
-            <tr><td class="fw-bold">D</td><td>Fecha inicio ciclo <em>dd/mm/aaaa</em></td></tr>
-            <tr><td class="fw-bold">E</td><td>Saldo inicial horas</td></tr>
-            <tr><td class="fw-bold text-warning">F</td><td><strong>Días trabajados</strong> (manual)</td></tr>
-            <tr><td class="fw-bold text-warning">G</td><td><strong>Auxilio de transporte</strong> (0=auto)</td></tr>
-            <tr><td class="fw-bold">H-AL</td><td>Código turno días 1-31</td></tr>
-          </table>
-          <div class="alert alert-info py-1 mb-0" style="font-size:.76rem">
-            <strong>Códigos:</strong> D · N · X · FD · FN · AD · AN · VC · IN · P · AU · LC · ID · CV · DE · PS · RT
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-      <div class="card h-100">
-        <div class="card-header"><span class="badge bg-warning text-dark me-1">3</span> Sube el archivo</div>
-        <div class="card-body">
-          <div class="drop-zone" id="drop-zone"
-               ondragover="event.preventDefault();this.classList.add('drag-over')"
-               ondragleave="this.classList.remove('drag-over')"
-               ondrop="onDrop(event)">
-            <i class="bi bi-cloud-arrow-up" style="font-size:2.8rem;color:var(--azul-med)"></i>
-            <p class="fw-bold text-primary mb-1 mt-2">Arrastra aquí tu plantilla</p>
-            <p class="text-muted mb-2" style="font-size:.8rem">o haz clic para seleccionar</p>
-            <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('file-input').click()">
-              <i class="bi bi-folder2-open me-1"></i>Seleccionar archivo
-            </button>
-            <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none" onchange="onFileSelect(this)">
-          </div>
-          <div id="upload-status" class="mt-2 d-none"></div>
-          <div id="validation-box" class="mt-2 d-none"></div>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-      <div class="card h-100">
-        <div class="card-header"><span class="badge bg-warning text-dark me-1">4</span> Calcula la nómina</div>
-        <div class="card-body d-flex flex-column">
-          <div id="emp-preview" class="flex-grow-1 mb-3" style="font-size:.8rem;min-height:120px">
-            <p class="text-muted text-center mt-4"><i class="bi bi-arrow-left me-1"></i>Carga la plantilla primero</p>
-          </div>
-          <button class="btn btn-warning btn-lg fw-bold w-100" onclick="calcularDesdeTab()">
-            <i class="bi bi-calculator me-2"></i>Calcular Nómina
-          </button>
-          <button class="btn btn-success mt-2 w-100 d-none" id="btn-descargar-res">
-            <i class="bi bi-file-earmark-excel me-2"></i>Descargar Resultado
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ TAB PARÁMETROS con acordeón ══ -->
-<div class="tab-pane fade" id="tab-params">
-  <div class="accordion" id="acc-params">
-
-    <!-- Sección 1: Parámetros generales -->
-    <div class="acc-item accordion-item">
-      <h2 class="accordion-header">
-        <button class="accordion-button acc-btn" type="button" data-bs-toggle="collapse" data-bs-target="#acc-general">
-          <i class="bi bi-gear-fill me-2"></i>Parámetros Generales del Ciclo
-        </button>
-      </h2>
-      <div id="acc-general" class="accordion-collapse collapse show" data-bs-parent="#acc-params">
-        <div class="acc-body">
-          <div class="row g-3">
-            <div class="col-md-2"><label class="form-label">Año</label>
-              <input type="number" class="form-control" id="p-anio" value="2026"></div>
-            <div class="col-md-2"><label class="form-label">Mes</label>
-              <select class="form-select" id="p-mes">
-                <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
-                <option value="4" selected>Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-                <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
-                <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-              </select></div>
-            <div class="col-md-2"><label class="form-label">Días de ciclo</label>
-              <input type="number" class="form-control" id="p-dias-ciclo" value="21"></div>
-            <div class="col-md-2"><label class="form-label">Horas objetivo</label>
-              <input type="number" class="form-control" id="p-horas-obj" value="132" step="0.5"></div>
-            <div class="col-md-2"><label class="form-label">Horas por turno</label>
-              <input type="number" class="form-control" id="p-horas-turno" value="12.583333" step="0.01"></div>
-            <div class="col-md-2"><label class="form-label">Inicio nocturno (h)</label>
-              <input type="number" class="form-control" id="p-ini-noc" value="19" min="0" max="23"></div>
-            <div class="col-md-2"><label class="form-label">Fin nocturno (h)</label>
-              <input type="number" class="form-control" id="p-fin-noc" value="6" min="0" max="23"></div>
-        <div class="col-md-2">
-          <label class="form-label">Divisor IVH
-            <i class="bi bi-info-circle text-muted" style="font-size:.72rem"
-              title="Horas/mes para calcular el Valor Hora&#13;IVH = Salario / Divisor&#13;Ej: 44h/sem / 6 días × 30 días = 220h/mes"></i>
-          </label>
-          <input type="number" class="form-control" id="p-horas-mes" value="220" step="1" min="1">
-          <small class="text-muted" style="font-size:.72rem">IVH = Salario ÷ 220</small>
-        </div>
-            <div class="col-md-8 d-flex align-items-end">
-              <div class="alert alert-info mb-0 py-2 w-100" style="font-size:.78rem">
-                <strong>Códigos de turno:</strong>
-                <span class="badge t-D ms-1">D</span> Diurno
-                <span class="badge t-N ms-1">N</span> Nocturno
-                <span class="badge t-X ms-1">X</span> Descanso
-                <span class="badge t-FD ms-1">FD</span> Fest.D
-                <span class="badge t-FN ms-1">FN</span> Fest.N
-                <span class="badge t-AD ms-1">AD</span> Adic.D
-                <span class="badge t-AN ms-1">AN</span> Adic.N
-                · VC · IN · P · AU · LC · ID · CV · DE · PS · RT
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sección 2: Reglas de liquidación -->
-    <div class="acc-item accordion-item">
-      <h2 class="accordion-header">
-        <button class="accordion-button acc-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc-reglas">
-          <i class="bi bi-percent me-2"></i>Reglas de Liquidación
-        </button>
-      </h2>
-      <div id="acc-reglas" class="accordion-collapse collapse" data-bs-parent="#acc-params">
-        <div class="acc-body">
-          <p class="text-muted mb-3" style="font-size:.82rem">Porcentajes sobre el valor hora (IVH = Salario ÷ Horas objetivo).</p>
-          <div class="row g-3" id="reglas-form"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sección 3: Catálogo de Turnos -->
-    <div class="acc-item accordion-item">
-      <h2 class="accordion-header">
-        <button class="accordion-button acc-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc-turnos">
-          <i class="bi bi-clock-history me-2"></i>Catálogo de Turnos
-          <span class="badge bg-warning text-dark ms-2" style="font-size:.7rem">Parametrizable</span>
-        </button>
-      </h2>
-      <div id="acc-turnos" class="accordion-collapse collapse" data-bs-parent="#acc-params">
-        <div class="acc-body">
-          <p class="text-muted mb-2" style="font-size:.82rem">
-            Activa o desactiva <strong>Paga Día</strong> y <strong>Auxilio Transporte</strong> por tipo de turno.
-            Los cambios aplican al calcular. <em>Genera Horas</em> e <em>Inicio</em> son estructurales y no se editan.
-          </p>
-          <div style="overflow-x:auto">
-            <table class="table table-bordered table-sm mb-1" id="tbl-turnos-cat" style="font-size:.81rem;max-width:760px">
-              <thead>
-                <tr>
-                  <th style="background:#1F4E79;color:#fff;width:65px;text-align:center">Código</th>
-                  <th style="background:#1F4E79;color:#fff">Descripción</th>
-                  <th style="background:#1F4E79;color:#fff;width:72px;text-align:center">Inicio</th>
-                  <th style="background:#2E75B6;color:#fff;width:85px;text-align:center">Paga Día</th>
-                  <th style="background:#2E75B6;color:#fff;width:105px;text-align:center">Aux. Transp.</th>
-                  <th style="background:#6c757d;color:#fff;width:85px;text-align:center">Genera Hrs</th>
-                </tr>
-              </thead>
-              <tbody id="tbody-turnos-cat"></tbody>
-            </table>
-          </div>
-          <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Columnas azules son editables. Gris = fijo.</small>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sección 4: Festivos -->
-    <div class="acc-item accordion-item">
-      <h2 class="accordion-header">
-        <button class="accordion-button acc-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc-festivos">
-          <i class="bi bi-calendar3 me-2"></i>Festivos Colombia
-          <span class="badge bg-warning text-dark ms-2" id="cnt-festivos-badge">0</span>
-        </button>
-      </h2>
-      <div id="acc-festivos" class="accordion-collapse collapse" data-bs-parent="#acc-params">
-        <div class="acc-body">
-          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-            <div class="d-flex align-items-center gap-3" style="font-size:.8rem">
-              <span><span class="badge py-2 px-3" style="background:#ffc107;color:#000">■</span> Festivo — clic para eliminar</span>
-              <span style="color:#dc3545;font-weight:700">Dom</span><span class="text-muted"> = Domingo</span>
-              <span class="text-muted">Total: <strong id="cnt-festivos">0</strong> festivos</span>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-              <input type="date" class="form-control form-control-sm" id="inp-festivo" style="width:160px">
-              <button class="btn btn-warning btn-sm" id="btn-add-fest"><i class="bi bi-plus-lg me-1"></i>Agregar</button>
-              <div class="d-flex align-items-center gap-0" style="background:var(--azul);border-radius:8px;padding:4px 10px;">
-                <button class="cal-nav-btn" id="btn-yr-prev">&#8592;</button>
-                <span class="cal-year-display text-white mx-2" id="cal-year-lbl">2026</span>
-                <button class="cal-nav-btn" id="btn-yr-next">&#8594;</button>
-              </div>
-            </div>
-          </div>
-          <div class="row g-2" id="cal-container"></div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- accordion -->
-</div><!-- tab-params -->
-
-<!-- ══ TAB EMPLEADOS ══ -->
-<div class="tab-pane fade" id="tab-empleados">
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2" style="background:var(--azul);color:#fff;border-radius:10px 10px 0 0;font-weight:600;">
-      <span><i class="bi bi-people-fill me-2"></i>Matriz de Turnos</span>
-      <div class="d-flex align-items-center gap-2">
-        <input type="text" class="form-control form-control-sm search-box" id="emp-search" placeholder="🔎 Buscar nombre o ID...">
-        <button class="btn btn-sm btn-light" id="btn-add-emp"><i class="bi bi-plus-lg me-1"></i>Agregar</button>
-      </div>
-    </div>
-    <div class="card-body p-2">
-      <div class="tbl-scroll" id="emp-scroll" style="overflow:auto">
-        <table class="table table-bordered table-sm mb-0" id="tbl-empleados">
-          <thead id="thead-emp"></thead>
-          <tbody id="tbody-emp"></tbody>
-        </table>
-      </div>
-      <div class="pager" id="emp-pager"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ TAB RESULTADOS ══ -->
-<div class="tab-pane fade" id="tab-resultados">
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2" style="background:var(--azul);color:#fff;border-radius:10px 10px 0 0;font-weight:600;">
-      <span><i class="bi bi-table me-2"></i>Resultados de Liquidación</span>
-      <div class="d-flex align-items-center gap-2">
-        <input type="text" class="form-control form-control-sm search-box d-none" id="res-search" placeholder="🔎 Buscar empleado o ID...">
-        <button class="btn btn-success btn-sm d-none" id="btn-dl-excel">
-          <i class="bi bi-file-earmark-excel me-1"></i>Descargar Excel
-        </button>
-      </div>
-    </div>
-    <div class="card-body p-2">
-      <div id="res-placeholder" class="text-center text-muted py-5">
-        <i class="bi bi-calculator" style="font-size:3rem;opacity:.25"></i>
-        <p class="mt-2">Presiona <strong>Calcular Nómina</strong> para ver resultados</p>
-      </div>
-      <div class="tbl-scroll d-none" id="res-scroll">
-        <table class="table table-bordered table-sm mb-0" id="tbl-resultados">
-          <thead id="thead-res"></thead>
-          <tbody id="tbody-res"></tbody>
-          <tfoot id="tfoot-res"></tfoot>
-        </table>
-      </div>
-      <div class="pager" id="res-pager"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ TAB DETALLE ══ -->
-<div class="tab-pane fade" id="tab-detalle">
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center" style="background:var(--azul);color:#fff;border-radius:10px 10px 0 0;font-weight:600;">
-      <span><i class="bi bi-search me-2"></i>Detalle por Turno / Día</span>
-      <button class="btn btn-success btn-sm d-none" id="btn-dl-detalle">
-        <i class="bi bi-file-earmark-excel me-1"></i>Descargar Detalle
-      </button>
-    </div>
-    <div class="card-body">
-      <!-- Filtros pill-style con autoaplicación -->
-      <div class="filter-bar mb-3">
-        <!-- Empleado: dropdown con checkboxes -->
-        <div class="f-group" id="fg-emp">
-          <span class="f-group-label"><i class="bi bi-person-fill me-1"></i>Empleado</span>
-          <div class="f-dropdown" id="fd-emp">
-            <button class="f-dropdown-btn" type="button" onclick="toggleFDropdown('fd-emp',event)" id="fd-emp-btn">
-              Todos <span class="f-cnt d-none" id="fd-emp-cnt"></span>
-              <i class="bi bi-chevron-down ms-1" style="font-size:.65rem"></i>
-            </button>
-            <div class="f-dropdown-menu" id="fd-emp-menu"></div>
-          </div>
-        </div>
-        <!-- Ciclo -->
-        <div class="f-group">
-          <span class="f-group-label"><i class="bi bi-arrow-left-right me-1"></i>Ciclo</span>
-          <div class="f-pills" id="pills-ciclo">
-            <button class="f-pill" data-val="ant" onclick="togglePill(this,'ciclo')">Anterior</button>
-            <button class="f-pill" data-val="act" onclick="togglePill(this,'ciclo')">Actual</button>
-            <button class="f-pill" data-val="pos" onclick="togglePill(this,'ciclo')">Posterior</button>
-          </div>
-        </div>
-        <!-- Turno -->
-        <div class="f-group">
-          <span class="f-group-label"><i class="bi bi-clock me-1"></i>Turno</span>
-          <div class="f-pills" id="pills-turno"></div>
-        </div>
-        <!-- Día semana -->
-        <div class="f-group">
-          <span class="f-group-label"><i class="bi bi-calendar-week me-1"></i>Día</span>
-          <div class="f-pills" id="pills-dia">
-            <button class="f-pill" data-val="Lun" onclick="togglePill(this,'dia')">Lun</button>
-            <button class="f-pill" data-val="Mar" onclick="togglePill(this,'dia')">Mar</button>
-            <button class="f-pill" data-val="Mié" onclick="togglePill(this,'dia')">Mié</button>
-            <button class="f-pill" data-val="Jue" onclick="togglePill(this,'dia')">Jue</button>
-            <button class="f-pill" data-val="Vie" onclick="togglePill(this,'dia')">Vie</button>
-            <button class="f-pill" data-val="Sáb" onclick="togglePill(this,'dia')">Sáb</button>
-            <button class="f-pill" data-val="Dom" onclick="togglePill(this,'dia')">Dom</button>
-          </div>
-        </div>
-        <!-- Vista -->
-        <div class="f-group">
-          <span class="f-group-label"><i class="bi bi-layout-text-window me-1"></i>Vista</span>
-          <div class="f-pills" id="pills-vista">
-            <button class="f-pill active" data-val="resumen" onclick="detSetView('resumen')">Resumen</button>
-            <button class="f-pill" data-val="dias" onclick="detSetView('dias')">Día a día</button>
-          </div>
-        </div>
-        <!-- Buscador -->
-        <div class="f-group">
-          <span class="f-group-label"><i class="bi bi-search me-1"></i>Buscar</span>
-          <input type="text" class="form-control form-control-sm search-box" id="det-search" placeholder="Nombre o ID...">
-        </div>
-        <!-- Acciones -->
-        <div class="f-group align-self-end">
-          <button class="btn btn-outline-secondary btn-sm" onclick="limpiarFiltros()">
-            <i class="bi bi-x-circle me-1"></i>Limpiar
-          </button>
-        </div>
-        <!-- Info -->
-        <div class="f-info d-none" id="det-info">
-          <i class="bi bi-funnel-fill me-1 text-primary"></i>
-          <strong id="det-count">0</strong> turnos
-        </div>
-      </div>
-      <!-- Tabla -->
+    <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">NF</div>
       <div>
-        <div id="det-placeholder" class="text-center text-muted py-4">
-          <i class="bi bi-calculator" style="font-size:2.5rem;opacity:.25"></i>
-          <p class="mt-2">Calcula la nómina para ver el detalle</p>
-        </div>
-        <div class="tbl-scroll tbl-sticky1 d-none" id="det-scroll">
-        <table class="table table-bordered table-sm mb-0" id="tbl-detalle">
-          <thead>
-            <tr>
-              <th rowspan="2">Empleado</th><th rowspan="2">Día</th><th rowspan="2">Fecha</th>
-              <th rowspan="2">D.Sem</th><th rowspan="2">Turno</th><th rowspan="2">Ciclo</th>
-              <th rowspan="2">Acum.<br>Inicio</th>
-              <th colspan="5" style="background:#2c6a9e">Recargos (≤ obj)</th>
-              <th colspan="5" style="background:#3a7abf">Extras (&gt; obj)</th>
-              <th rowspan="2">Total<br>Hrs</th>
-              <th rowspan="2" style="background:#155724">Vr. Recargo</th>
-              <th rowspan="2" style="background:#155724">Vr. Extra</th>
-              <th rowspan="2" style="background:#155724">Vr. Total</th>
-            </tr>
-            <tr>
-              <th style="background:#2c6a9e">Tot Rec</th><th style="background:#2c6a9e">Diurno</th>
-              <th style="background:#2c6a9e">Noct</th><th style="background:#2c6a9e">Fest D</th>
-              <th style="background:#2c6a9e">Fest N</th>
-              <th style="background:#3a7abf">Tot Ext</th><th style="background:#3a7abf">Diurna</th>
-              <th style="background:#3a7abf">Noct</th><th style="background:#3a7abf">Fest D</th>
-              <th style="background:#3a7abf">Fest N</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-det"></tbody>
-          <tfoot id="tfoot-det"></tfoot>
-        </table>
-        </div><!-- det-scroll -->
-        <div class="pager" id="det-pager"></div>
+        <h1>Nomina CST</h1>
+        <p>Liquidación de nómina</p>
       </div>
     </div>
+    <nav class="nav flex-column app-nav">
+      <a class="app-nav-link active" data-bs-toggle="tab" href="#tab-inicio">
+        <i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span>
+      </a>
+      <a class="app-nav-link" data-bs-toggle="tab" href="#tab-carga">
+        <i class="bi bi-cloud-arrow-up-fill"></i><span>Cargar Plantilla</span>
+      </a>
+      <a class="app-nav-link" data-bs-toggle="tab" href="#tab-params">
+        <i class="bi bi-sliders"></i><span>Parámetros</span>
+      </a>
+      <a class="app-nav-link" data-bs-toggle="tab" href="#tab-empleados">
+        <i class="bi bi-people-fill"></i><span>Empleados <span class="badge bg-secondary ms-1" id="cnt-emp">0</span></span>
+      </a>
+      <a class="app-nav-link" data-bs-toggle="tab" href="#tab-resultados">
+        <i class="bi bi-table"></i><span>Resultados</span>
+      </a>
+      <a class="app-nav-link" data-bs-toggle="tab" href="#tab-detalle">
+        <i class="bi bi-search"></i><span>Detalle</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-actions">
+        <button class="btn btn-dark w-100" type="button" onclick="document.getElementById('btn-calcular').click()">
+          <i class="bi bi-calculator me-2"></i>Calcular Nómina
+        </button>
+      </div>
+    </div>
+    </aside>
+  </div>
+
+  <div class="main-shell">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="eyebrow">Gestión de Nómina</div>
+          <h2>Liquidación y control</h2>
+        </div>
+        <div class="topbar-search">
+          <i class="bi bi-search"></i>
+          <input type="text" placeholder="Buscar empleados, parámetros o reportes...">
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span class="period-chip" id="ui-period-chip">Abril 2026</span>
+        <button class="icon-btn" type="button" aria-label="Notificaciones"><i class="bi bi-bell"></i></button>
+        <button class="icon-btn" type="button" aria-label="Ayuda"><i class="bi bi-question-circle"></i></button>
+        <button class="btn btn-dark fw-bold" id="btn-calcular" type="button">
+          <i class="bi bi-calculator me-2"></i>Calcular Nómina
+        </button>
+      </div>
+    </header>
+
+    <main class="content-wrap">
+      <div class="spinner-overlay" id="spinner">
+        <div class="text-center text-white">
+          <div class="spinner-border mb-3" style="width:3rem;height:3rem"></div>
+          <div class="fw-bold fs-5">Calculando…</div>
+        </div>
+      </div>
+      <div class="toast-container" id="toast-container"></div>
+
+      <div class="tab-content">
+
+        <!-- ══ TAB INICIO ══ -->
+        <div class="tab-pane fade show active" id="tab-inicio">
+          <div class="hero-grid">
+            <section class="panel hero-panel">
+              <div class="hero-inner">
+                <div class="hero-badge"><i class="bi bi-shield-lock-fill"></i> Personal de Seguridad</div>
+                <h1 class="hero-title">Sistema de liquidación de nómina con foco operativo</h1>
+                <p class="hero-sub">
+                  Revisa, ajusta y calcula recargos, horas extras, festivos y auxilio de transporte en una sola vista.
+                  La lógica permanece intacta, pero la experiencia queda mucho más limpia y gerencial.
+                </p>
+                <div class="hero-actions">
+                  <button class="btn btn-light btn-lg" onclick="irA('tab-carga')">
+                    <i class="bi bi-cloud-arrow-up me-2"></i>Cargar plantilla
+                  </button>
+                  <button class="btn btn-outline-light btn-lg" onclick="irA('tab-params')">
+                    <i class="bi bi-sliders me-2"></i>Configurar parámetros
+                  </button>
+                </div>
+                <div class="hero-stats">
+                  <div class="stat-pill">
+                    <span>Días de ciclo</span>
+                    <strong id="ui-cycle-days">21</strong>
+                  </div>
+                  <div class="stat-pill">
+                    <span>Horas objetivo</span>
+                    <strong id="ui-hours-goal">132h</strong>
+                  </div>
+                  <div class="stat-pill">
+                    <span>Rango nocturno</span>
+                    <strong id="ui-night-range">19:00 - 06:00</strong>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="hero-side">
+              <div class="panel panel-pad hero-mini">
+                <h5><i class="bi bi-calendar3 me-2"></i>Resumen del período</h5>
+                <p class="mb-2">Usa la plantilla, ajusta los parámetros del periodo y mantiene trazabilidad en cada cálculo.</p>
+                <div class="muted-card mt-3">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted">Festivos cargados</span>
+                    <span class="value" id="ui-festivos-count">0</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="text-muted">Periodo activo</span>
+                    <span class="value" id="ui-period-chip-copy">Abril 2026</span>
+                  </div>
+                </div>
+              </div>
+              <div class="soft-note">
+                <h5><i class="bi bi-lightning-charge me-2"></i>Atajo operativo</h5>
+                <p>Primero carga la plantilla, luego ajusta reglas y finalmente ejecuta el cálculo. La exportación queda lista al final del flujo.</p>
+              </div>
+            </aside>
+          </div>
+
+          <div class="quick-grid">
+            <div class="quick-card" onclick="irA('tab-carga')">
+              <div class="quick-ico" style="background:#e5efff;color:#16335c"><i class="bi bi-cloud-arrow-up"></i></div>
+              <h6>1. Carga tu plantilla</h6>
+              <p>Descarga el Excel base, complétalo y súbelo aquí para cargar empleados y turnos.</p>
+            </div>
+            <div class="quick-card" onclick="irA('tab-params')">
+              <div class="quick-ico" style="background:#eef7f0;color:#1f7a3f"><i class="bi bi-sliders"></i></div>
+              <h6>2. Ajusta parámetros</h6>
+              <p>Actualiza el ciclo, las reglas de recargo, el catálogo de turnos y los festivos.</p>
+            </div>
+            <div class="quick-card" onclick="irA('tab-empleados')">
+              <div class="quick-ico" style="background:#fef3e6;color:#b36b00"><i class="bi bi-people-fill"></i></div>
+              <h6>3. Revisa empleados</h6>
+              <p>Edita la matriz de turnos con buscador, paginación y scroll fijo para gran volumen.</p>
+            </div>
+            <div class="quick-card" onclick="document.getElementById('btn-calcular').click()">
+              <div class="quick-ico" style="background:#fdecec;color:#ba1a1a"><i class="bi bi-calculator"></i></div>
+              <h6>4. Calcula y exporta</h6>
+              <p>Genera resultados y detalle para descargar Excel con validaciones listas.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ TAB CARGA ══ -->
+        <div class="tab-pane fade" id="tab-carga">
+          <div class="page-head">
+            <div>
+              <div class="page-kicker">Carga de datos</div>
+              <h3 class="page-title">Plantilla y validación</h3>
+              <p class="page-subtitle">Mantuvimos el mismo flujo de carga, solo lo presentamos con una composición más clara y ordenada.</p>
+            </div>
+          </div>
+
+          <div class="section-grid">
+            <section class="panel panel-pad">
+              <div class="toolbar">
+                <div>
+                  <h5 class="panel-title mb-1">Ingreso de plantilla</h5>
+                  <p class="panel-sub">Descarga, completa y carga el archivo Excel.</p>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-lg-4">
+                  <div class="panel panel-pad h-100 glass-card d-flex flex-column">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                      <div>
+                        <div class="fw-bold">Paso 1</div>
+                        <div class="text-muted" style="font-size:.8rem">Obtén la base oficial</div>
+                      </div>
+                      <i class="bi bi-file-earmark-excel" style="font-size:1.6rem;color:#1f4e79"></i>
+                    </div>
+                    <p class="text-muted mb-0" style="font-size:.84rem">La plantilla trae instrucciones, catálogo de turnos y la matriz lista para completar.</p>
+                    <a href="/api/plantilla" class="btn btn-dark mt-auto align-self-start" download>
+                      <i class="bi bi-download me-2"></i>Descargar plantilla
+                    </a>
+                  </div>
+                </div>
+                <div class="col-lg-4">
+                  <div class="panel panel-pad h-100 glass-card">
+                    <div class="fw-bold mb-2">Paso 2</div>
+                    <div class="text-muted" style="font-size:.84rem">
+                      Completa la hoja <code>PLANTILLA_CARGA</code> respetando celdas amarillas y códigos de turno.
+                    </div>
+                    <div class="small text-muted mt-2">B: nombre, C: salario, D: fecha inicio, E: saldo inicial, F/G manuales, H-AL turnos.</div>
+                  </div>
+                </div>
+                <div class="col-lg-4">
+                  <div class="panel panel-pad h-100 glass-card">
+                    <div class="fw-bold mb-2">Paso 3</div>
+                    <div class="text-muted mb-2" style="font-size:.84rem">Sube el archivo y revisa advertencias antes de calcular.</div>
+                    <div class="drop-zone" id="drop-zone"
+                         ondragover="event.preventDefault();this.classList.add('drag-over')"
+                         ondragleave="this.classList.remove('drag-over')"
+                         ondrop="onDrop(event)">
+                      <i class="bi bi-cloud-arrow-up"></i>
+                      <div class="drop-title">Arrastra aquí tu plantilla</div>
+                      <p class="drop-sub">o haz clic para seleccionar</p>
+                      <button type="button" class="btn btn-outline-dark btn-sm" onclick="document.getElementById('file-input').click()">
+                        <i class="bi bi-folder2-open me-1"></i>Seleccionar archivo
+                      </button>
+                      <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none" onchange="onFileSelect(this)">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="params-side">
+              <section class="panel panel-pad">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <div>
+                    <h5 class="panel-title mb-1">Vista previa</h5>
+                    <p class="panel-sub">Empleados cargados y valor base.</p>
+                  </div>
+                </div>
+                <div id="emp-preview" class="mb-3" style="min-height:180px">
+                  <p class="text-muted text-center mt-4"><i class="bi bi-arrow-left me-1"></i>Carga la plantilla primero</p>
+                </div>
+                <button class="btn btn-dark mini-action" onclick="calcularDesdeTab()">
+                  <i class="bi bi-calculator me-2"></i>Calcular nómina
+                </button>
+                <button class="btn btn-outline-dark mini-action mt-2 d-none" id="btn-descargar-res">
+                  <i class="bi bi-file-earmark-excel me-2"></i>Descargar resultado
+                </button>
+              </section>
+
+              <div id="upload-status" class="d-none"></div>
+              <div id="validation-box" class="d-none"></div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- ══ TAB PARÁMETROS ══ -->
+        <div class="tab-pane fade" id="tab-params">
+          <div class="page-head">
+            <div>
+              <div class="page-kicker">Configuración</div>
+              <h3 class="page-title">Parámetros de liquidación</h3>
+              <p class="page-subtitle">Define los valores globales para el procesamiento del periodo actual.</p>
+            </div>
+          </div>
+
+          <div class="section-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h5 class="panel-title">Configuración operativa</h5>
+                  <p class="panel-sub">Periodo, reglas, catálogo y festivos.</p>
+                </div>
+              </div>
+              <div class="acc-body" style="border:none;border-radius:0;padding:1rem 1.2rem 1.2rem">
+                <div class="accordion" id="acc-params">
+                  <div class="acc-item accordion-item">
+                    <h2 class="accordion-header">
+                      <button class="accordion-button acc-btn" type="button" data-bs-toggle="collapse" data-bs-target="#acc-general">
+                        <i class="bi bi-gear-fill me-2"></i>Parámetros Generales del Ciclo
+                      </button>
+                    </h2>
+                    <div id="acc-general" class="accordion-collapse collapse show" data-bs-parent="#acc-params">
+                      <div class="acc-body">
+                        <div class="row g-3">
+                          <div class="col-md-2">
+                            <label class="form-label">Año</label>
+                            <input type="number" class="form-control" id="p-anio" value="2026">
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label">Mes</label>
+                            <select class="form-select" id="p-mes">
+                              <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+                              <option value="4" selected>Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+                              <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+                              <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                            </select>
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label">Días de ciclo</label>
+                            <input type="number" class="form-control" id="p-dias-ciclo" value="21">
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label">Horas objetivo</label>
+                            <input type="number" class="form-control" id="p-horas-obj" value="132" step="0.5">
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label">Horas por turno</label>
+                            <input type="number" class="form-control" id="p-horas-turno" value="12.583333" step="0.01">
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label">Inicio nocturno (h)</label>
+                            <input type="number" class="form-control" id="p-ini-noc" value="19" min="0" max="23">
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label">Fin nocturno (h)</label>
+                            <input type="number" class="form-control" id="p-fin-noc" value="6" min="0" max="23">
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label">Divisor IVH</label>
+                            <input type="number" class="form-control" id="p-horas-mes" value="220" step="1" min="1">
+                            <small class="text-muted" style="font-size:.72rem">IVH = Salario ÷ 220</small>
+                          </div>
+                          <div class="col-md-8 d-flex align-items-end">
+                            <div class="alert alert-info mb-0 py-2 w-100" style="font-size:.78rem">
+                              <strong>Códigos de turno:</strong>
+                              <span class="badge t-D ms-1">D</span> Diurno
+                              <span class="badge t-N ms-1">N</span> Nocturno
+                              <span class="badge t-X ms-1">X</span> Descanso
+                              <span class="badge t-FD ms-1">FD</span> Fest.D
+                              <span class="badge t-FN ms-1">FN</span> Fest.N
+                              <span class="badge t-AD ms-1">AD</span> Adic.D
+                              <span class="badge t-AN ms-1">AN</span> Adic.N
+                              · VC · IN · P · AU · LC · ID · CV · DE · PS · RT
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="acc-item accordion-item mt-3">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button acc-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc-reglas">
+                          <i class="bi bi-percent me-2"></i>Reglas de Liquidación
+                        </button>
+                      </h2>
+                      <div id="acc-reglas" class="accordion-collapse collapse" data-bs-parent="#acc-params">
+                        <div class="acc-body">
+                          <p class="text-muted mb-3" style="font-size:.82rem">Porcentajes sobre el valor hora (IVH = Salario ÷ Horas objetivo).</p>
+                          <div class="row g-3" id="reglas-form"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="acc-item accordion-item mt-3">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button acc-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc-turnos">
+                          <i class="bi bi-clock-history me-2"></i>Catálogo de Turnos
+                          <span class="badge bg-warning text-dark ms-2" style="font-size:.7rem">Parametrizable</span>
+                        </button>
+                      </h2>
+                      <div id="acc-turnos" class="accordion-collapse collapse" data-bs-parent="#acc-params">
+                        <div class="acc-body">
+                          <p class="text-muted mb-2" style="font-size:.82rem">
+                            Activa o desactiva <strong>Paga Día</strong> y <strong>Auxilio Transporte</strong> por tipo de turno.
+                            Los cambios aplican al calcular.
+                          </p>
+                          <div style="overflow-x:auto">
+                            <table class="table table-bordered table-sm mb-1" id="tbl-turnos-cat" style="font-size:.81rem;max-width:760px">
+                              <thead>
+                                <tr>
+                                  <th style="background:#0b1c30;color:#fff;width:65px;text-align:center">Código</th>
+                                  <th style="background:#0b1c30;color:#fff">Descripción</th>
+                                  <th style="background:#0b1c30;color:#fff;width:72px;text-align:center">Inicio</th>
+                                  <th style="background:#2E75B6;color:#fff;width:85px;text-align:center">Paga Día</th>
+                                  <th style="background:#2E75B6;color:#fff;width:105px;text-align:center">Aux. Transp.</th>
+                                  <th style="background:#6c757d;color:#fff;width:85px;text-align:center">Genera Hrs</th>
+                                </tr>
+                              </thead>
+                              <tbody id="tbody-turnos-cat"></tbody>
+                            </table>
+                          </div>
+                          <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Columnas azules editables. Gris = fijo.</small>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="acc-item accordion-item mt-3">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button acc-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc-festivos">
+                          <i class="bi bi-calendar3 me-2"></i>Festivos Colombia
+                          <span class="badge bg-warning text-dark ms-2" id="cnt-festivos-badge">0</span>
+                        </button>
+                      </h2>
+                      <div id="acc-festivos" class="accordion-collapse collapse" data-bs-parent="#acc-params">
+                        <div class="acc-body">
+                          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-3" style="font-size:.8rem">
+                              <span><span class="badge py-2 px-3" style="background:#ffc107;color:#000">■</span> Festivo — clic para eliminar</span>
+                              <span style="color:#dc3545;font-weight:700">Dom</span><span class="text-muted"> = Domingo</span>
+                              <span class="text-muted">Total: <strong id="cnt-festivos">0</strong> festivos</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                              <input type="date" class="form-control form-control-sm" id="inp-festivo" style="width:160px">
+                              <button class="btn btn-warning btn-sm" id="btn-add-fest"><i class="bi bi-plus-lg me-1"></i>Agregar</button>
+                              <div class="d-flex align-items-center gap-0" style="background:#0b1c30;border-radius:14px;padding:4px 10px;">
+                                <button class="cal-nav-btn" id="btn-yr-prev">&#8592;</button>
+                                <span class="cal-year-display text-white mx-2" id="cal-year-lbl">2026</span>
+                                <button class="cal-nav-btn" id="btn-yr-next">&#8594;</button>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row g-2" id="cal-container"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="stack">
+              <div class="panel panel-pad accent-card">
+                <h5 class="panel-title mb-3">Resumen del periodo</h5>
+                <div class="d-grid gap-3">
+                  <div class="d-flex justify-content-between align-items-center border-bottom border-white border-opacity-10 pb-2">
+                    <span class="muted">Periodo activo</span>
+                    <strong id="ui-period-chip-side">Abril 2026</strong>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom border-white border-opacity-10 pb-2">
+                    <span class="muted">Días del ciclo</span>
+                    <strong id="ui-cycle-days-side">21</strong>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom border-white border-opacity-10 pb-2">
+                    <span class="muted">Horas objetivo</span>
+                    <strong id="ui-hours-goal-side">132h</strong>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="muted">Festivos cargados</span>
+                    <strong id="ui-festivos-count-side">0</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="soft-note">
+                <h5><i class="bi bi-lightbulb me-2"></i>Tip operativo</h5>
+                <p>Si ajustas el rango nocturno o los porcentajes, el cálculo se recalcula con el mismo motor y la exportación mantiene el detalle por turno.</p>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- ══ TAB EMPLEADOS ══ -->
+        <div class="tab-pane fade" id="tab-empleados">
+          <div class="page-head">
+            <div>
+              <div class="page-kicker">Carga mensual</div>
+              <h3 class="page-title">Matriz de turnos</h3>
+              <p class="page-subtitle">Edición directa de empleados y turnos con buscador y paginación, sin perder la lógica existente.</p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h5 class="panel-title">Empleados</h5>
+                <p class="panel-sub">Matriz editable por día del mes.</p>
+              </div>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <input type="text" class="form-control form-control-sm search-box" id="emp-search" placeholder="Buscar nombre o ID...">
+                <button class="btn btn-dark btn-sm" id="btn-add-emp"><i class="bi bi-plus-lg me-1"></i>Agregar</button>
+              </div>
+            </div>
+            <div class="panel-pad">
+              <div class="tbl-scroll" id="emp-scroll" style="overflow:auto">
+                <table class="table table-bordered table-sm mb-0" id="tbl-empleados">
+                  <thead id="thead-emp"></thead>
+                  <tbody id="tbody-emp"></tbody>
+                </table>
+              </div>
+              <div class="pager" id="emp-pager"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ TAB RESULTADOS ══ -->
+        <div class="tab-pane fade" id="tab-resultados">
+          <div class="page-head">
+            <div>
+              <div class="page-kicker">Salida del cálculo</div>
+              <h3 class="page-title">Resultados de liquidación</h3>
+              <p class="page-subtitle">Resumen ejecutivo con salida preparada para exportar a Excel, igual que en la versión funcional actual.</p>
+            </div>
+            <button class="btn btn-dark d-none" id="btn-dl-excel">
+              <i class="bi bi-file-earmark-excel me-2"></i>Descargar Excel
+            </button>
+          </div>
+
+          <div class="result-head">
+            <section class="result-total">
+              <div class="muted text-uppercase small mb-2" style="letter-spacing:.12em">Costo total nómina</div>
+              <div class="value" id="ui-total-payroll">$0</div>
+              <div class="muted mt-2" id="ui-result-count">0 empleados procesados</div>
+            </section>
+            <section class="stack">
+              <div class="result-mini-grid">
+                <div class="result-mini">
+                  <div class="label">Recargos totales</div>
+                  <div class="value" id="ui-rec-total">$0</div>
+                </div>
+                <div class="result-mini">
+                  <div class="label">Horas extra</div>
+                  <div class="value" id="ui-ext-total">$0</div>
+                </div>
+                <div class="result-mini">
+                  <div class="label">Auxilio transporte</div>
+                  <div class="value" id="ui-aux-total">$0</div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h5 class="panel-title">Detalle de liquidación por empleado</h5>
+                <p class="panel-sub">Tabla con scroll, totales y búsqueda.</p>
+              </div>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <input type="text" class="form-control form-control-sm search-box d-none" id="res-search" placeholder="Buscar empleado o ID...">
+              </div>
+            </div>
+            <div class="panel-pad">
+              <div id="res-placeholder" class="text-center text-muted py-5">
+                <i class="bi bi-calculator" style="font-size:3rem;opacity:.25"></i>
+                <p class="mt-2">Presiona <strong>Calcular Nómina</strong> para ver resultados</p>
+              </div>
+              <div class="tbl-scroll d-none" id="res-scroll">
+                <table class="table table-bordered table-sm mb-0" id="tbl-resultados">
+                  <thead id="thead-res"></thead>
+                  <tbody id="tbody-res"></tbody>
+                  <tfoot id="tfoot-res"></tfoot>
+                </table>
+              </div>
+              <div class="pager" id="res-pager"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ TAB DETALLE ══ -->
+        <div class="tab-pane fade" id="tab-detalle">
+          <div class="page-head">
+            <div>
+              <div class="page-kicker">Auditoría</div>
+              <h3 class="page-title">Detalle por turno y día</h3>
+              <p class="page-subtitle">Vista granular para revisar el origen de cada valor calculado y cruzarlo con los turnos cargados.</p>
+            </div>
+            <button class="btn btn-dark d-none" id="btn-dl-detalle">
+              <i class="bi bi-file-earmark-excel me-2"></i>Descargar detalle
+            </button>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h5 class="panel-title">Filtros de detalle</h5>
+                <p class="panel-sub">Segmenta por empleado, ciclo, turno, día y vista.</p>
+              </div>
+            </div>
+            <div class="panel-pad">
+              <div class="filter-bar mb-3">
+                <div class="f-group" id="fg-emp">
+                  <span class="f-group-label"><i class="bi bi-person-fill me-1"></i>Empleado</span>
+                  <div class="f-dropdown" id="fd-emp">
+                    <button class="f-dropdown-btn" type="button" onclick="toggleFDropdown('fd-emp',event)" id="fd-emp-btn">
+                      Todos <span class="f-cnt d-none" id="fd-emp-cnt"></span>
+                      <i class="bi bi-chevron-down ms-1" style="font-size:.65rem"></i>
+                    </button>
+                    <div class="f-dropdown-menu" id="fd-emp-menu"></div>
+                  </div>
+                </div>
+                <div class="f-group">
+                  <span class="f-group-label"><i class="bi bi-arrow-left-right me-1"></i>Ciclo</span>
+                  <div class="f-pills" id="pills-ciclo">
+                    <button class="f-pill" data-val="ant" onclick="togglePill(this,'ciclo')">Anterior</button>
+                    <button class="f-pill" data-val="act" onclick="togglePill(this,'ciclo')">Actual</button>
+                    <button class="f-pill" data-val="pos" onclick="togglePill(this,'ciclo')">Posterior</button>
+                  </div>
+                </div>
+                <div class="f-group">
+                  <span class="f-group-label"><i class="bi bi-clock me-1"></i>Turno</span>
+                  <div class="f-pills" id="pills-turno"></div>
+                </div>
+                <div class="f-group">
+                  <span class="f-group-label"><i class="bi bi-calendar-week me-1"></i>Día</span>
+                  <div class="f-pills" id="pills-dia">
+                    <button class="f-pill" data-val="Lun" onclick="togglePill(this,'dia')">Lun</button>
+                    <button class="f-pill" data-val="Mar" onclick="togglePill(this,'dia')">Mar</button>
+                    <button class="f-pill" data-val="Mié" onclick="togglePill(this,'dia')">Mié</button>
+                    <button class="f-pill" data-val="Jue" onclick="togglePill(this,'dia')">Jue</button>
+                    <button class="f-pill" data-val="Vie" onclick="togglePill(this,'dia')">Vie</button>
+                    <button class="f-pill" data-val="Sáb" onclick="togglePill(this,'dia')">Sáb</button>
+                    <button class="f-pill" data-val="Dom" onclick="togglePill(this,'dia')">Dom</button>
+                  </div>
+                </div>
+                <div class="f-group">
+                  <span class="f-group-label"><i class="bi bi-layout-text-window me-1"></i>Vista</span>
+                  <div class="f-pills" id="pills-vista">
+                    <button class="f-pill active" data-val="resumen" onclick="detSetView('resumen')">Resumen</button>
+                    <button class="f-pill" data-val="dias" onclick="detSetView('dias')">Día a día</button>
+                  </div>
+                </div>
+                <div class="f-group">
+                  <span class="f-group-label"><i class="bi bi-search me-1"></i>Buscar</span>
+                  <input type="text" class="form-control form-control-sm search-box" id="det-search" placeholder="Nombre o ID...">
+                </div>
+                <div class="f-group align-self-end">
+                  <button class="btn btn-outline-secondary btn-sm" onclick="limpiarFiltros()">
+                    <i class="bi bi-x-circle me-1"></i>Limpiar
+                  </button>
+                </div>
+                <div class="f-info d-none" id="det-info">
+                  <i class="bi bi-funnel-fill me-1 text-primary"></i>
+                  <strong id="det-count">0</strong> turnos
+                </div>
+              </div>
+
+              <div>
+                <div id="det-placeholder" class="text-center text-muted py-4">
+                  <i class="bi bi-calculator" style="font-size:2.5rem;opacity:.25"></i>
+                  <p class="mt-2">Calcula la nómina para ver el detalle</p>
+                </div>
+                <div class="tbl-scroll tbl-sticky1 d-none" id="det-scroll">
+                  <table class="table table-bordered table-sm mb-0" id="tbl-detalle">
+                    <thead>
+                      <tr>
+                        <th rowspan="2">Empleado</th><th rowspan="2">Día</th><th rowspan="2">Fecha</th>
+                        <th rowspan="2">D.Sem</th><th rowspan="2">Turno</th><th rowspan="2">Ciclo</th>
+                        <th rowspan="2">Acum.<br>Inicio</th>
+                        <th colspan="5" style="background:#2c6a9e">Recargos (&lt;= obj)</th>
+                        <th colspan="5" style="background:#3a7abf">Extras (&gt; obj)</th>
+                        <th rowspan="2">Total<br>Hrs</th>
+                        <th rowspan="2" style="background:#155724">Vr. Recargo</th>
+                        <th rowspan="2" style="background:#155724">Vr. Extra</th>
+                        <th rowspan="2" style="background:#155724">Vr. Total</th>
+                      </tr>
+                      <tr>
+                        <th style="background:#2c6a9e">Tot Rec</th><th style="background:#2c6a9e">Diurno</th>
+                        <th style="background:#2c6a9e">Noct</th><th style="background:#2c6a9e">Fest D</th>
+                        <th style="background:#2c6a9e">Fest N</th>
+                        <th style="background:#3a7abf">Tot Ext</th><th style="background:#3a7abf">Diurna</th>
+                        <th style="background:#3a7abf">Noct</th><th style="background:#3a7abf">Fest D</th>
+                        <th style="background:#3a7abf">Fest N</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-det"></tbody>
+                    <tfoot id="tfoot-det"></tfoot>
+                  </table>
+                </div>
+                <div class="pager" id="det-pager"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
   </div>
 </div>
-
-</div><!-- tab-content -->
-</div><!-- container -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -629,6 +1179,39 @@ var S = {
 var calYear=2026;
 var PAGE_SIZE=100, RES_PAGE=1, DET_PAGE=1, EMP_PAGE=1, RES_SEARCH='', DET_SEARCH='', EMP_SEARCH='';
 var DET_VIEW='resumen', DET_EXPANDED={};
+function syncUiSummary(){
+  var period=(MESES[(S.params.mes||1)-1]||'')+' '+(S.params.anio||'');
+  ['ui-period-chip','ui-period-chip-copy'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.textContent=period;
+  });
+  var days=(S.params.dias_ciclo||0);
+  var daysEl=document.getElementById('ui-cycle-days'); if(daysEl) daysEl.textContent=days;
+  var daysSide=document.getElementById('ui-cycle-days-side'); if(daysSide) daysSide.textContent=days;
+  var hrs=(S.params.horas_objetivo||0)+'h';
+  var hrsEl=document.getElementById('ui-hours-goal'); if(hrsEl) hrsEl.textContent=hrs;
+  var hrsSide=document.getElementById('ui-hours-goal-side'); if(hrsSide) hrsSide.textContent=hrs;
+  var night=String(S.params.inicio_noc_h==null?19:S.params.inicio_noc_h).padStart(2,'0')+':00 - '
+    +String(S.params.fin_noc_h==null?6:S.params.fin_noc_h).padStart(2,'0')+':00';
+  var nightEl=document.getElementById('ui-night-range'); if(nightEl) nightEl.textContent=night;
+  var festCount=(S.festivos||[]).length;
+  ['ui-festivos-count','ui-festivos-count-side'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.textContent=festCount;
+  });
+}
+function toggleSidebar(){
+  var sidebar=document.querySelector('.sidebar');
+  var btn=document.getElementById('btn-sidebar-toggle');
+  if(!sidebar || !btn) return;
+  var collapsed=sidebar.classList.toggle('collapsed');
+  btn.innerHTML = collapsed
+    ? '<i class="bi bi-chevron-right"></i>'
+    : '<i class="bi bi-chevron-left"></i>';
+  btn.setAttribute('aria-label', collapsed ? 'Mostrar menú' : 'Ocultar menú');
+  btn.setAttribute('title', collapsed ? 'Mostrar menú' : 'Ocultar menú');
+  btn.setAttribute('aria-expanded', String(!collapsed));
+}
 function detSetView(v){
   DET_VIEW=v; DET_PAGE=1;
   var pills=document.querySelectorAll('#pills-vista .f-pill');
@@ -696,6 +1279,7 @@ function leerParams(){
   S.params.inicio_noc_h   =+document.getElementById('p-ini-noc').value;
   S.params.fin_noc_h      =+document.getElementById('p-fin-noc').value;
   S.params.horas_mes       =+document.getElementById('p-horas-mes').value;
+  syncUiSummary();
 }
 
 var _saveTimer=null;
@@ -728,6 +1312,7 @@ function applyData(data){
   calYear=S.params.anio||2026;
   renderReglas(); renderCalendario(); renderEmpleados(); renderCatalogTurnos();
   renderValidation(S.validation);
+  syncUiSummary();
 }
 
 function onDrop(e){
@@ -879,6 +1464,7 @@ async function descargarDetalle(){
   } finally{spin(false);}
 }
 document.getElementById('btn-dl-detalle').addEventListener('click',descargarDetalle);
+document.getElementById('btn-sidebar-toggle').addEventListener('click',toggleSidebar);
 
 // ─── Resultados ───
 function renderResultados(){
@@ -915,6 +1501,11 @@ function renderResultados(){
     tRec+=r.valor_recargo; tEd+=v.ext_diurna||0; tEn+=v.ext_noct||0; tEfd+=v.ext_fest_d||0; tEfn+=v.ext_fest_n||0;
     tExt+=r.valor_extra; tAux+=r.auxilio_transporte; tP+=r.total_pagar;
   });
+  var uiTotal=document.getElementById('ui-total-payroll'); if(uiTotal) uiTotal.textContent='$'+fmt(tP);
+  var uiCount=document.getElementById('ui-result-count'); if(uiCount) uiCount.textContent=data.length+' empleados procesados';
+  var uiRec=document.getElementById('ui-rec-total'); if(uiRec) uiRec.textContent='$'+fmt(tRec);
+  var uiExt=document.getElementById('ui-ext-total'); if(uiExt) uiExt.textContent='$'+fmt(tExt);
+  var uiAux=document.getElementById('ui-aux-total'); if(uiAux) uiAux.textContent='$'+fmt(tAux);
   // Paginación
   var totalPages=Math.max(1,Math.ceil(data.length/PAGE_SIZE));
   if(RES_PAGE>totalPages) RES_PAGE=totalPages;
@@ -986,7 +1577,7 @@ function renderCalendario(){
   var festSet=new Set(S.festivos);
   var cont=document.getElementById('cal-container');cont.innerHTML='';
   for(var m=1;m<=12;m++){
-    var col=document.createElement('div');col.className='col-xl-2 col-lg-3 col-md-4 col-sm-6';
+    var col=document.createElement('div');col.className='col-xl-3 col-lg-4 col-md-6 col-12';
     var dias=new Date(anio,m,0).getDate();
     var primerDow=new Date(anio,m-1,1).getDay();
     var html='<div class="cal-mes"><h6>'+MESES[m-1]+'</h6><div class="cal-grid">';
@@ -1008,6 +1599,7 @@ function renderCalendario(){
     });
     cont.appendChild(col);
   }
+  syncUiSummary();
 }
 document.getElementById('btn-yr-prev').addEventListener('click',function(){calYear--;renderCalendario();});
 document.getElementById('btn-yr-next').addEventListener('click',function(){calYear++;renderCalendario();});

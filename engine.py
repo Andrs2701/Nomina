@@ -393,6 +393,17 @@ def calcular_nomina(params, empleados, reglas, festivos):
             "hrs_fest_noc":         round(hrs_rec["FEST_NOCTURNO"] + hrs_ext["FEST_NOCTURNA"], 2),
             "hrs_ext_diurnas":      round(hrs_ext["DIURNA"], 2),
             "hrs_ext_noc":          round(hrs_ext["NOCTURNA"], 2),
+            # Horas separadas por concepto exacto (sin mezcla fest_rec con fest_ext).
+            "hrs_por_concepto": {
+                "rec_diurno":   round(hrs_rec["DIURNO"], 2),
+                "rec_nocturno": round(hrs_rec["NOCTURNO"], 2),
+                "rec_fest_d":   round(hrs_rec["FEST_DIURNO"], 2),
+                "rec_fest_n":   round(hrs_rec["FEST_NOCTURNO"], 2),
+                "ext_diurna":   round(hrs_ext["DIURNA"], 2),
+                "ext_nocturna": round(hrs_ext["NOCTURNA"], 2),
+                "ext_fest_d":   round(hrs_ext["FEST_DIURNA"], 2),
+                "ext_fest_n":   round(hrs_ext["FEST_NOCTURNA"], 2),
+            },
             "valor_recargo":        val_rec_total,
             "valor_extra":          val_ext_total,
             "val":                  val,

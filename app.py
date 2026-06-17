@@ -578,41 +578,119 @@ def _generar_excel_soporte_empleado(r, params, reglas):
     ws["A2"] = f"Empleado: {r.get('nombre','')} (ID {r.get('id','')})"
     ws["A2"].font = Font(bold=True, size=11); ws["A2"].alignment = LEFT
 
+    # Datos de liquidación (sin Salario proporcional, Días trabajados ni Días con paga día —
+    # se suprimen para no confundir al empleado). Fechas en dd/mm/aaaa.
     rows_info = [
-        ("Salario mensual",        round(r.get("salario_mensual", 0))),
-        ("Salario proporcional",   round(r.get("salario_proporcional", 0))),
-        ("Días trabajados",        r.get("dias_trabajados", 0)),
-        ("Días con paga día",      r.get("dias_paga_dia", 0)),
-        ("Días con aux. transp.",  r.get("dias_aux_transp", 0)),
-        ("IVH (Salario ÷ horas_mes)", round(ivh)),
-        ("Horas objetivo del ciclo", r.get("horas_objetivo", params.get("horas_objetivo", 132))),
-        ("Inicio del ciclo (FIC)", r.get("fic", "")),
-        ("Fin del ciclo (FIC_FIN)", r.get("fic_fin", "")),
-        ("Inicio del siguiente ciclo", r.get("fic_siguiente", "")),
-        ("", ""),
-        ("Total horas liquidadas", round(r.get("total_horas", 0), 2)),
-        ("Valor recargos",         r.get("valor_recargo", 0)),
-        ("Valor horas extra",      r.get("valor_extra", 0)),
-        ("Auxilio transporte",     r.get("auxilio_transporte", 0)),
-        ("TOTAL A PAGAR",          r.get("total_pagar", 0)),
+        ("Salario mensual",            round(r.get("salario_mensual", 0)),                      "money"),
+        ("Días con aux. transporte",   r.get("dias_aux_transp", 0),                             "num"),
+        ("IVH (Salario ÷ horas_mes)",  round(ivh),                                              "money"),
+        ("Horas objetivo del ciclo",   r.get("horas_objetivo", params.get("horas_objetivo", 132)), "num"),
+        ("Inicio del ciclo",           _fecha_dmy(r.get("fic", "")),                            "text"),
+        ("Fin del ciclo",              _fecha_dmy(r.get("fic_fin", "")),                        "text"),
+        ("Inicio del siguiente ciclo", _fecha_dmy(r.get("fic_siguiente", "")),                  "text"),
+        ("", "", "blank"),
+        ("Total horas liquidadas",     round(r.get("total_horas", 0), 2),                       "hrs"),
+        ("Valor recargos",             r.get("valor_recargo", 0),                               "money"),
+        ("Valor horas extra",          r.get("valor_extra", 0),                                 "money"),
+        ("Auxilio transporte",         r.get("auxilio_transporte", 0),                          "money"),
+        ("TOTAL A PAGAR",              r.get("total_pagar", 0),                                 "total"),
     ]
     rr = 4
-    for label, value in rows_info:
-        ws.cell(row=rr, column=1, value=label).font = Font(bold=(label == "TOTAL A PAGAR"), size=10)
+    for label, value, kind in rows_info:
+        ws.cell(row=rr, column=1, value=label).font = Font(bold=(kind == "total"), size=10)
         c = ws.cell(row=rr, column=2, value=value)
-        if isinstance(value, (int, float)):
-            c.number_format = (FMT_HRS if isinstance(value, float) and label.lower().startswith("horas") else FMT_NUM)
+        if kind == "money":
+            c.number_format = FMT_NUM; c.alignment = RIGHT
+        elif kind == "hrs":
+            c.number_format = FMT_HRS; c.alignment = RIGHT
+        elif kind == "num":
             c.alignment = RIGHT
-        if label == "TOTAL A PAGAR":
+        elif kind == "text":
+            c.alignment = RIGHT; c.font = Font(size=10)
+        if kind == "total":
             c.font = Font(bold=True, color="C00000", size=11)
+            c.number_format = FMT_NUM; c.alignment = RIGHT
             c.fill = PatternFill("solid", fgColor=C_TOT)
             ws.cell(row=rr, column=1).fill = PatternFill("solid", fgColor=C_TOT)
         rr += 1
 
-    ws.column_dimensions["A"].width = 30
-    ws.column_dimensions["B"].width = 20
-    ws.column_dimensions["C"].width = 4
-    ws.column_dimensions["D"].width = 4
+    # ── Bloque "Detalle por concepto" debajo del resumen ───────
+    rr += 1  # separador visual
+
+    ws.merge_cells(start_row=rr, start_column=1, end_row=rr, end_column=4)
+    section = ws.cell(row=rr, column=1, value="DETALLE POR CONCEPTO")
+    section.font = Font(bold=True, color="FFFFFF", size=11)
+    section.fill = PatternFill("solid", fgColor=C_TITLE)
+    section.alignment = CENTER
+    section.border = BDR
+    ws.row_dimensions[rr].height = 22
+    rr += 1
+
+    headers = ["CONCEPTO", "FACTOR", "HORAS", "VALOR"]
+    for c, h in enumerate(headers, 1):
+        cell = ws.cell(row=rr, column=c, value=h)
+        f, fill = hdr(C_TITLE); cell.font = f; cell.fill = fill; cell.alignment = CENTER; cell.border = BDR
+    rr += 1
+
+    # Conceptos sin % en el nombre — el porcentaje lo expresa la columna FACTOR,
+    # que se lee dinámicamente de las reglas (Parámetros) en cada generación.
+    # Horas separadas por concepto exacto (recargo distinto de extra incluso en festivos).
+    val = r.get("val", {}) or {}
+    h_conc = r.get("hrs_por_concepto") or {}
+
+    filas_conc = [
+        ("Recargo diurno",            "REC_DIURNO",            0.0,
+         h_conc.get("rec_diurno", 0),   val.get("rec_diurno", 0)),
+        ("Recargo nocturno",          "REC_NOCTURNO",          0.35,
+         h_conc.get("rec_nocturno", 0), val.get("rec_noct", 0)),
+        ("Recargo dom/fest diurno",   "REC_DOM_FEST_DIURNO",   0.80,
+         h_conc.get("rec_fest_d", 0),  val.get("rec_fest_d", 0)),
+        ("Recargo dom/fest nocturno", "REC_DOM_FEST_NOCTURNO", 1.15,
+         h_conc.get("rec_fest_n", 0),  val.get("rec_fest_n", 0)),
+        ("Extra diurna",              "EXT_DIURNA",            1.25,
+         h_conc.get("ext_diurna", 0),  val.get("ext_diurna", 0)),
+        ("Extra nocturna",            "EXT_NOCTURNA",          1.75,
+         h_conc.get("ext_nocturna", 0), val.get("ext_noct", 0)),
+        ("Extra fest diurna",         "EXT_FEST_DIURNA",       2.05,
+         h_conc.get("ext_fest_d", 0),  val.get("ext_fest_d", 0)),
+        ("Extra fest nocturna",       "EXT_FEST_NOCTURNA",     2.55,
+         h_conc.get("ext_fest_n", 0),  val.get("ext_fest_n", 0)),
+    ]
+    tot_horas = 0.0
+    tot_valor = 0
+    for i, (concepto, regla_key, default, horas, vlr) in enumerate(filas_conc):
+        factor = reglas.get(regla_key, default)
+        even = (i % 2 == 1)
+        bg = PatternFill("solid", fgColor=C_ALT) if even else PatternFill(fill_type=None)
+        cA = ws.cell(row=rr, column=1, value=concepto); cA.alignment = LEFT; cA.font = Font(size=10)
+        cB = ws.cell(row=rr, column=2, value=f"{round(factor*100)}%"); cB.alignment = CENTER; cB.font = Font(size=10)
+        cC = ws.cell(row=rr, column=3, value=horas); cC.number_format = FMT_HRS; cC.alignment = RIGHT
+        cD = ws.cell(row=rr, column=4, value=vlr);   cD.number_format = FMT_NUM; cD.alignment = RIGHT
+        for c in (cA, cB, cC, cD):
+            c.border = BDR
+            if even: c.fill = bg
+        tot_horas += horas or 0
+        tot_valor += vlr or 0
+        rr += 1
+
+    # Total del bloque conceptos
+    cT1 = ws.cell(row=rr, column=1, value="TOTAL")
+    cT1.font = Font(bold=True, size=10)
+    cT1.fill = PatternFill("solid", fgColor=C_TOT); cT1.border = BDR
+    for c in range(2, 4):
+        cell = ws.cell(row=rr, column=c)
+        cell.fill = PatternFill("solid", fgColor=C_TOT); cell.border = BDR
+    cT3 = ws.cell(row=rr, column=3, value=round(tot_horas, 2))
+    cT3.font = Font(bold=True, size=10); cT3.number_format = FMT_HRS; cT3.alignment = RIGHT
+    cT3.fill = PatternFill("solid", fgColor=C_TOT); cT3.border = BDR
+    cT4 = ws.cell(row=rr, column=4, value=tot_valor)
+    cT4.font = Font(bold=True, color="C00000", size=11); cT4.number_format = FMT_NUM; cT4.alignment = RIGHT
+    cT4.fill = PatternFill("solid", fgColor=C_TOT); cT4.border = BDR
+
+    ws.column_dimensions["A"].width = 34
+    ws.column_dimensions["B"].width = 12
+    ws.column_dimensions["C"].width = 14
+    ws.column_dimensions["D"].width = 18
 
     # ── Hoja 2: DETALLE TURNO ───────────────────────────────────
     ws2 = wb.create_sheet("DETALLE_TURNO")
@@ -702,66 +780,77 @@ def _generar_excel_soporte_empleado(r, params, reglas):
         ws2.column_dimensions[get_column_letter(i)].width = w
     ws2.freeze_panes = "A3"
 
-    # ── Hoja 3: CONCEPTOS (horas + valor por concepto) ─────────
-    ws3 = wb.create_sheet("CONCEPTOS")
-    ws3.merge_cells("A1:D1")
-    ws3["A1"] = f"HORAS Y VALOR POR CONCEPTO – {r.get('nombre','')} – {mes_nombre} {anio}"
-    f, fill = hdr(C_TITLE, sz=12); ws3["A1"].font = f; ws3["A1"].fill = fill; ws3["A1"].alignment = CENTER
+    # ── Resumen del ciclo vigente (al final del DETALLE_TURNO) ──
+    # Replica visual de la tarjeta de la UI: 1 fila de etiquetas + 1 fila de valores
+    # con bloques distribuidos a lo ancho del detalle, fácil de leer en una sola pasada.
+    rr += 2  # dos filas en blanco como separador visual
 
-    headers = ["CONCEPTO", "FACTOR", "HORAS", "VALOR"]
-    for c, h in enumerate(headers, 1):
-        cell = ws3.cell(row=2, column=c, value=h)
-        f, fill = hdr(C_TITLE); cell.font = f; cell.fill = fill; cell.alignment = CENTER; cell.border = BDR
+    last_col_letter = get_column_letter(ncol)
+    ws2.merge_cells(start_row=rr, start_column=1, end_row=rr, end_column=ncol)
+    cH1 = ws2.cell(row=rr, column=1, value="RESUMEN DEL CICLO VIGENTE")
+    cH1.font = Font(bold=True, color="FFFFFF", size=12)
+    cH1.fill = PatternFill("solid", fgColor=C_TITLE)
+    cH1.alignment = CENTER
+    cH1.border = BDR
+    ws2.row_dimensions[rr].height = 22
+    rr += 1
 
-    # Conceptos sin % en el nombre — el porcentaje lo expresa la columna FACTOR,
-    # que se lee dinámicamente de la hoja de Parámetros (reglas) en cada generación.
-    val = r.get("val", {}) or {}
-    filas_conc = [
-        ("Recargo diurno",            "REC_DIURNO",            0.0,
-         r.get("hrs_diurnas", 0),     val.get("rec_diurno", 0)),
-        ("Recargo nocturno",          "REC_NOCTURNO",          0.35,
-         r.get("hrs_nocturnas", 0),   val.get("rec_noct", 0)),
-        ("Recargo dom/fest diurno",   "REC_DOM_FEST_DIURNO",   0.80,
-         r.get("hrs_fest_diurnas", 0), val.get("rec_fest_d", 0)),
-        ("Recargo dom/fest nocturno", "REC_DOM_FEST_NOCTURNO", 1.15,
-         r.get("hrs_fest_noc", 0),    val.get("rec_fest_n", 0)),
-        ("Extra diurna",              "EXT_DIURNA",            1.25,
-         r.get("hrs_ext_diurnas", 0), val.get("ext_diurna", 0)),
-        ("Extra nocturna",            "EXT_NOCTURNA",          1.75,
-         r.get("hrs_ext_noc", 0),     val.get("ext_noct", 0)),
-        ("Extra fest diurna",         "EXT_FEST_DIURNA",       2.05,
-         0,                           val.get("ext_fest_d", 0)),
-        ("Extra fest nocturna",       "EXT_FEST_NOCTURNA",     2.55,
-         0,                           val.get("ext_fest_n", 0)),
+    ws2.merge_cells(start_row=rr, start_column=1, end_row=rr, end_column=ncol)
+    cH2 = ws2.cell(row=rr, column=1,
+                   value="Acumulados del ciclo que continúa hacia el siguiente mes — útil para proyectar la próxima nómina.")
+    cH2.font = Font(italic=True, color="6c757d", size=9)
+    cH2.alignment = Alignment(horizontal="left", vertical="center", indent=1)
+    rr += 1
+
+    pos = (r.get("ciclos") or {}).get("pos", {}) or {}
+    proy_val = (pos.get("val_rec", 0) or 0) + (pos.get("val_ext", 0) or 0)
+
+    # 8 KPIs distribuidos en grupos de cols (suman 26 = ncol exacto).
+    cv_fields = [
+        ("INICIO PRÓXIMO CICLO", _fecha_dmy(r.get("fic_siguiente", "")),                    4),
+        ("HORAS ACUMULADAS",     f"{round(pos.get('total_hrs', 0) or 0, 2):.2f} h",         3),
+        ("RECARGOS",             f"{round(pos.get('total_rec', 0) or 0, 2):.2f} h",         3),
+        ("EXTRAS",               f"{round(pos.get('total_ext', 0) or 0, 2):.2f} h",         3),
+        ("NOCTURNAS",            f"{round(pos.get('h_nocturnas', 0) or 0, 2):.2f} h",       3),
+        ("DOM/FESTIVAS",         f"{round(pos.get('h_dom_fest', 0) or 0, 2):.2f} h",        3),
+        ("TOTAL ACUMULADO",      f"{round(pos.get('acum', 0) or 0, 2):.2f} h",              3),
+        ("VALOR PROYECTADO",     "$" + f"{round(proy_val):,}".replace(",", "."),            4),
     ]
-    rr = 3
-    for concepto, regla_key, default, horas, vlr in filas_conc:
-        factor = reglas.get(regla_key, default)
-        ws3.cell(row=rr, column=1, value=concepto).alignment = LEFT
-        ws3.cell(row=rr, column=2, value=f"{round(factor*100)}%").alignment = CENTER
-        cH = ws3.cell(row=rr, column=3, value=horas);  cH.number_format = FMT_HRS; cH.alignment = RIGHT
-        cV = ws3.cell(row=rr, column=4, value=vlr);    cV.number_format = FMT_NUM; cV.alignment = RIGHT
-        for c in range(1, 5):
-            ws3.cell(row=rr, column=c).border = BDR
-        rr += 1
-    # Totales
-    ws3.cell(row=rr, column=1, value="TOTAL").font = Font(bold=True)
-    ws3.cell(row=rr, column=1).fill = PatternFill("solid", fgColor=C_TOT)
-    cV = ws3.cell(row=rr, column=4, value=r.get("valor_recargo", 0) + r.get("valor_extra", 0))
-    cV.font = Font(bold=True, color="C00000"); cV.number_format = FMT_NUM; cV.alignment = RIGHT
-    cV.fill = PatternFill("solid", fgColor=C_TOT)
-    for c in range(2, 4):
-        cell = ws3.cell(row=rr, column=c); cell.fill = PatternFill("solid", fgColor=C_TOT); cell.border = BDR
-    ws3.cell(row=rr, column=1).border = BDR
-    cV.border = BDR
+    col = 1
+    label_fill  = PatternFill("solid", fgColor="eef3f9")
+    val_fill_a  = PatternFill("solid", fgColor="ffffff")
+    val_fill_b  = PatternFill("solid", fgColor="f7fafe")
+    for i, (label, value, span) in enumerate(cv_fields):
+        last = col + span - 1
+        # Etiqueta (gris pequeño)
+        ws2.merge_cells(start_row=rr, start_column=col, end_row=rr, end_column=last)
+        lc = ws2.cell(row=rr, column=col, value=label)
+        lc.font = Font(bold=True, color="6c757d", size=8)
+        lc.alignment = Alignment(horizontal="left", vertical="center", indent=1)
+        lc.fill = label_fill
+        lc.border = BDR
+        # Valor (azul oscuro, grande)
+        ws2.merge_cells(start_row=rr+1, start_column=col, end_row=rr+1, end_column=last)
+        vc = ws2.cell(row=rr+1, column=col, value=value)
+        vc.font = Font(bold=True, color="1F4E79", size=13)
+        vc.alignment = Alignment(horizontal="left", vertical="center", indent=1)
+        vc.fill = val_fill_a if i % 2 == 0 else val_fill_b
+        vc.border = BDR
+        col += span
+    ws2.row_dimensions[rr].height = 18
+    ws2.row_dimensions[rr+1].height = 28
+    rr += 2
 
-    ws3.column_dimensions["A"].width = 40
-    ws3.column_dimensions["B"].width = 10
-    ws3.column_dimensions["C"].width = 12
-    ws3.column_dimensions["D"].width = 16
+    # Nota al pie
+    ws2.merge_cells(start_row=rr, start_column=1, end_row=rr, end_column=ncol)
+    ft = ws2.cell(row=rr, column=1,
+                  value=f"Próxima nómina arrancará desde {_fecha_dmy(r.get('fic_siguiente', ''))}. "
+                        f"Umbral del ciclo: {r.get('horas_objetivo', params.get('horas_objetivo', 132))} h.")
+    ft.font = Font(italic=True, color="6c757d", size=9)
+    ft.alignment = Alignment(horizontal="left", vertical="center", indent=1)
 
     # Proteger las hojas contra edición accidental (sin contraseña).
-    for sheet in (ws, ws2, ws3):
+    for sheet in (ws, ws2):
         sheet.protection.sheet = True
         sheet.protection.enable()
 

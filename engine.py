@@ -72,6 +72,10 @@ def calcular_nomina(params, empleados, reglas, festivos):
     smmlv      = float(params.get("smmlv", 1423500))
     aux_mens   = float(params.get("auxilio_transporte_mensual", 200000))
     limite_aux = smmlv * 2
+    # Fase 3: almuerzo explícito — minutos desde el inicio del turno donde ocurre el descanso.
+    # Por defecto 6h tras el inicio (turno D inicia 6:00 → almuerzo 12:00; turno N inicia 18:00 → 00:00 del día siguiente).
+    alm_offset_min = int(round(float(params.get("almuerzo_offset_h", 6)) * 60))
+    alm_dur_min    = int(params.get("almuerzo_duracion_min", 25))
 
     _, dias_mes = monthrange(anio, mes)
     primer_dia_mes = date(anio, mes, 1)
@@ -146,8 +150,27 @@ def calcular_nomina(params, empleados, reglas, festivos):
             cursor        = inicio
             remaining     = min_turno
 
+            # Fase 3: rango absoluto del almuerzo (minutos desde 00:00 del día base del turno).
+            # Los segmentos se cortan en lunch_ini y se reanudan en lunch_fin; el tiempo del
+            # almuerzo no genera horas liquidadas, pero el cursor sí avanza para que la
+            # clasificación (día, fest, nocturno) se aplique al MOMENTO REAL donde ocurre.
+            lunch_ini = inicio + alm_offset_min
+            lunch_fin = lunch_ini + alm_dur_min
+
             while remaining > 0:
+                # Saltar la franja del almuerzo (no se acumula ni se clasifica).
+                if alm_dur_min > 0 and lunch_ini <= cursor < lunch_fin:
+                    cursor = lunch_fin
+                    continue
+
                 dur = min(60, remaining)
+                # No cruzar el inicio del almuerzo en el mismo segmento
+                if alm_dur_min > 0 and cursor < lunch_ini:
+                    dur = min(dur, lunch_ini - cursor)
+                # Mantener la segmentación alineada al cambio de hora-en-punto
+                next_hour_edge = ((cursor // 60) + 1) * 60
+                dur = min(dur, next_hour_edge - cursor)
+
                 de  = cursor // (24 * 60)
                 sd  = td + timedelta(days=de)
                 md  = cursor % (24 * 60)
@@ -171,8 +194,13 @@ def calcular_nomina(params, empleados, reglas, festivos):
         turn_agg = {}  # d_num -> {rec, ext, total_min, ciclo, acum_ini}
 
         for seg in all_segs:
-            sd    = seg["seg_date"]
-            ciclo = "ant" if sd < fic else ("act" if sd <= fic_fin else "pos")
+            sd       = seg["seg_date"]
+            td_seg   = seg["td"]
+            # Fase 4: el ciclo (y por tanto el umbral de 132h) se decide por la fecha de
+            # INICIO del turno, no del segmento. Así un turno N que arranca el último día
+            # del ciclo y cruza al ciclo siguiente NO reinicia el contador a 0h, evitando
+            # que recargos aparezcan tras superar las horas objetivo.
+            ciclo = "ant" if td_seg < fic else ("act" if td_seg <= fic_fin else "pos")
             bk    = buckets[ciclo]
             d_num = seg["d_num"]
             dur, noc, fest = seg["dur"], seg["noc"], seg["fest_dom"]
@@ -273,16 +301,31 @@ def calcular_nomina(params, empleados, reglas, festivos):
 
         ciclos_detalle = {}
         for c in ("ant", "act", "pos"):
-            vr_c = _vr(buckets[c]["rec"])
-            ve_c = _ve(buckets[c]["ext"])
-            hrs_c = sum(buckets[c]["rec"].values()) + sum(buckets[c]["ext"].values())
+            vr_c  = _vr(buckets[c]["rec"])
+            ve_c  = _ve(buckets[c]["ext"])
+            rec_c = buckets[c]["rec"]
+            ext_c = buckets[c]["ext"]
+            hrs_c = sum(rec_c.values()) + sum(ext_c.values())
+            # Fase 2.3: agregados por familia de concepto, útiles para el panel "Resumen del ciclo vigente".
+            h_diurnas   = rec_c["DIURNO"]        + ext_c["DIURNA"]
+            h_nocturnas = rec_c["NOCTURNO"]      + ext_c["NOCTURNA"]
+            h_fest_d    = rec_c["FEST_DIURNO"]   + ext_c["FEST_DIURNA"]
+            h_fest_n    = rec_c["FEST_NOCTURNO"] + ext_c["FEST_NOCTURNA"]
             ciclos_detalle[c] = {
-                "rec":       {t: round(buckets[c]["rec"][t], 2) for t in TIPOS_REC},
-                "ext":       {t: round(buckets[c]["ext"][t], 2) for t in TIPOS_EXT},
-                "total_hrs": round(hrs_c, 2),
-                "val_rec":   round(vr_c),
-                "val_ext":   round(ve_c),
-                "total_val": round(vr_c + ve_c),
+                "rec":         {t: round(rec_c[t], 2) for t in TIPOS_REC},
+                "ext":         {t: round(ext_c[t], 2) for t in TIPOS_EXT},
+                "total_hrs":   round(hrs_c, 2),
+                "total_rec":   round(sum(rec_c.values()), 2),
+                "total_ext":   round(sum(ext_c.values()), 2),
+                "h_diurnas":   round(h_diurnas, 2),
+                "h_nocturnas": round(h_nocturnas, 2),
+                "h_fest_d":    round(h_fest_d, 2),
+                "h_fest_n":    round(h_fest_n, 2),
+                "h_dom_fest":  round(h_fest_d + h_fest_n, 2),
+                "acum":        round(buckets[c]["acum"] / 60.0, 2),
+                "val_rec":     round(vr_c),
+                "val_ext":     round(ve_c),
+                "total_val":   round(vr_c + ve_c),
             }
 
         # Construir lista de detalle por dia ordenada
@@ -293,8 +336,17 @@ def calcular_nomina(params, empleados, reglas, festivos):
             total_rec_h = sum(ag["rec"].values())
             total_ext_h = sum(ag["ext"].values())
             total_h = ag["total_min"] / 60.0
-            vr_d = _vr(ag["rec"])
-            ve_d = _ve(ag["ext"])
+            # Fase 2.1: valor monetario por concepto en cada día (mismo cálculo que el resumen).
+            vr_rec_d  = ag["rec"]["DIURNO"]        * ivh * reglas.get("REC_DIURNO", 0.0)
+            vr_rec_n  = ag["rec"]["NOCTURNO"]      * ivh * reglas.get("REC_NOCTURNO", 0.35)
+            vr_rec_fd = ag["rec"]["FEST_DIURNO"]   * ivh * reglas.get("REC_DOM_FEST_DIURNO", 0.80)
+            vr_rec_fn = ag["rec"]["FEST_NOCTURNO"] * ivh * reglas.get("REC_DOM_FEST_NOCTURNO", 1.15)
+            ve_ext_d  = ag["ext"]["DIURNA"]        * ivh * reglas.get("EXT_DIURNA", 1.25)
+            ve_ext_n  = ag["ext"]["NOCTURNA"]      * ivh * reglas.get("EXT_NOCTURNA", 1.75)
+            ve_ext_fd = ag["ext"]["FEST_DIURNA"]   * ivh * reglas.get("EXT_FEST_DIURNA", 2.05)
+            ve_ext_fn = ag["ext"]["FEST_NOCTURNA"] * ivh * reglas.get("EXT_FEST_NOCTURNA", 2.55)
+            vr_d = vr_rec_d + vr_rec_n + vr_rec_fd + vr_rec_fn
+            ve_d = ve_ext_d + ve_ext_n + ve_ext_fd + ve_ext_fn
             detalle_dias.append({
                 "dia":        d_num,
                 "fecha":      td.strftime("%Y-%m-%d"),
@@ -313,9 +365,17 @@ def calcular_nomina(params, empleados, reglas, festivos):
                 "ext_fest_d":     round(ag["ext"]["FEST_DIURNA"], 2),
                 "ext_fest_n":     round(ag["ext"]["FEST_NOCTURNA"], 2),
                 "total_ext":      round(total_ext_h, 2),
-                "valor_recargo":  round(vr_d),
-                "valor_extra":    round(ve_d),
-                "valor_total":    round(vr_d + ve_d),
+                "vr_rec_diurno":   round(vr_rec_d),
+                "vr_rec_nocturno": round(vr_rec_n),
+                "vr_rec_fest_d":   round(vr_rec_fd),
+                "vr_rec_fest_n":   round(vr_rec_fn),
+                "vr_ext_diurna":   round(ve_ext_d),
+                "vr_ext_nocturna": round(ve_ext_n),
+                "vr_ext_fest_d":   round(ve_ext_fd),
+                "vr_ext_fest_n":   round(ve_ext_fn),
+                "valor_recargo":   round(vr_d),
+                "valor_extra":     round(ve_d),
+                "valor_total":     round(vr_d + ve_d),
             })
 
         resultados.append({
@@ -338,6 +398,10 @@ def calcular_nomina(params, empleados, reglas, festivos):
             "val":                  val,
             "auxilio_transporte":   auxilio,
             "total_pagar":          total,
+            "fic":                  fic.strftime("%Y-%m-%d"),
+            "fic_fin":              fic_fin.strftime("%Y-%m-%d"),
+            "fic_siguiente":        (fic_fin + timedelta(days=1)).strftime("%Y-%m-%d"),
+            "horas_objetivo":       horas_obj,
             "ciclos":               ciclos_detalle,
             "detalle_dias":         detalle_dias,
         })

@@ -416,6 +416,24 @@ label.form-label{font-weight:600;color:#243146;margin-bottom:.35rem}
 #tbl-detalle td{font-size:.76rem;vertical-align:middle;white-space:nowrap}
 #tbl-detalle tr:nth-child(even) td{background:#f7fafe}
 #tbl-detalle .tr-foot td{background:#0b1c30;color:#fff;font-weight:800}
+/* Fase 2.1: valor monetario debajo de las horas en la misma celda */
+#tbl-detalle .cell-money{font-size:.66rem;color:#155724;font-weight:600;margin-top:1px;line-height:1}
+#tbl-detalle .cell-money.muted{color:#9aa4b2;font-weight:400}
+#panel-ciclo-vigente .cv-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.85rem}
+#panel-ciclo-vigente .cv-emp{font-weight:700;color:#1F4E79;font-size:.95rem;margin-bottom:.35rem}
+#panel-ciclo-vigente .cv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.55rem;font-size:.78rem}
+#panel-ciclo-vigente .cv-grid .lbl{color:#6c757d;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em}
+#panel-ciclo-vigente .cv-grid .val{font-weight:700;color:#0b1c30;font-size:.95rem}
+#panel-ciclo-vigente .cv-bar{height:6px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin-top:.6rem}
+#panel-ciclo-vigente .cv-bar > div{height:100%;background:linear-gradient(90deg,#28a745,#20c997)}
+#panel-ciclo-vigente .cv-warn{color:#dc3545}
+#panel-auditoria .aud-finding{background:#fff;border-left:4px solid #2585c0;padding:.55rem .75rem;border-radius:6px;margin-bottom:.45rem;font-size:.82rem}
+#panel-auditoria .aud-finding.alta{border-left-color:#dc3545;background:#fff5f5}
+#panel-auditoria .aud-finding.info{border-left-color:#0d6efd}
+#panel-auditoria .aud-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.45rem;margin-bottom:.85rem}
+#panel-auditoria .aud-kpi .kpi-box{background:#0b1c30;color:#fff;padding:.55rem .65rem;border-radius:10px}
+#panel-auditoria .aud-kpi .kpi-box .lbl{font-size:.65rem;opacity:.7;text-transform:uppercase}
+#panel-auditoria .aud-kpi .kpi-box .val{font-size:1.1rem;font-weight:800}
 .ciclo-ant{background:#eaf3fb!important;}
 .ciclo-act{background:#e8f4ff!important;}
 .ciclo-pos{background:#eafbee!important;}
@@ -821,7 +839,17 @@ label.form-label{font-weight:600;color:#243146;margin-bottom:.35rem}
                             <input type="number" class="form-control" id="p-horas-mes" value="220" step="1" min="1">
                             <small class="text-muted" style="font-size:.72rem">IVH = Salario ÷ 220</small>
                           </div>
-                          <div class="col-md-8 d-flex align-items-end">
+                          <div class="col-md-2">
+                            <label class="form-label">Almuerzo offset (h)</label>
+                            <input type="number" class="form-control" id="p-alm-offset" value="6" step="0.5" min="0">
+                            <small class="text-muted" style="font-size:.72rem">Horas tras inicio del turno</small>
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label">Almuerzo duración (min)</label>
+                            <input type="number" class="form-control" id="p-alm-dur" value="25" step="1" min="0">
+                            <small class="text-muted" style="font-size:.72rem">Tiempo de descanso a descontar</small>
+                          </div>
+                          <div class="col-md-12">
                             <div class="alert alert-info mb-0 py-2 w-100" style="font-size:.78rem">
                               <strong>Códigos de turno:</strong>
                               <span class="badge t-D ms-1">D</span> Diurno
@@ -989,9 +1017,14 @@ label.form-label{font-weight:600;color:#243146;margin-bottom:.35rem}
               <h3 class="page-title">Resultados de liquidación</h3>
               <p class="page-subtitle">Resumen ejecutivo con salida preparada para exportar a Excel, igual que en la versión funcional actual.</p>
             </div>
-            <button class="btn btn-dark d-none" id="btn-dl-excel">
-              <i class="bi bi-file-earmark-excel me-2"></i>Descargar Excel
-            </button>
+            <div class="d-flex gap-2">
+              <button class="btn btn-dark d-none" id="btn-dl-excel">
+                <i class="bi bi-file-earmark-excel me-2"></i>Descargar Excel
+              </button>
+              <button class="btn btn-success d-none" id="btn-dl-soportes" title="Genera un Excel individual por empleado (ZIP si hay varios)">
+                <i class="bi bi-file-earmark-zip me-2"></i>Descargar soportes por empleado
+              </button>
+            </div>
           </div>
 
           <div class="result-head">
@@ -1053,9 +1086,14 @@ label.form-label{font-weight:600;color:#243146;margin-bottom:.35rem}
               <h3 class="page-title">Detalle por turno y día</h3>
               <p class="page-subtitle">Vista granular para revisar el origen de cada valor calculado y cruzarlo con los turnos cargados.</p>
             </div>
-            <button class="btn btn-dark d-none" id="btn-dl-detalle">
-              <i class="bi bi-file-earmark-excel me-2"></i>Descargar detalle
-            </button>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-primary d-none" id="btn-auditoria">
+                <i class="bi bi-shield-check me-2"></i>Ejecutar auditoría
+              </button>
+              <button class="btn btn-dark d-none" id="btn-dl-detalle">
+                <i class="bi bi-file-earmark-excel me-2"></i>Descargar detalle
+              </button>
+            </div>
           </div>
 
           <div class="panel">
@@ -1158,6 +1196,31 @@ label.form-label{font-weight:600;color:#243146;margin-bottom:.35rem}
                 <div class="pager" id="det-pager"></div>
               </div>
             </div>
+          </div>
+
+          <!-- Fase 2.3: Resumen del ciclo vigente -->
+          <div class="panel mt-3 d-none" id="panel-ciclo-vigente">
+            <div class="panel-header">
+              <div>
+                <h5 class="panel-title">Resumen del ciclo vigente</h5>
+                <p class="panel-sub">Acumulados del ciclo que continúa hacia el siguiente mes (bucket "pos"). Útil para proyectar la próxima nómina.</p>
+              </div>
+            </div>
+            <div class="panel-pad" id="cv-body"></div>
+          </div>
+
+          <!-- Fase 2.4: Auditoría de turnos -->
+          <div class="panel mt-3 d-none" id="panel-auditoria">
+            <div class="panel-header">
+              <div>
+                <h5 class="panel-title">Resultados de auditoría</h5>
+                <p class="panel-sub">Hallazgos sobre turnos con múltiples conceptos, cruces de día/mes/ciclo y horas posteriores al umbral.</p>
+              </div>
+              <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('panel-auditoria').classList.add('d-none')">
+                <i class="bi bi-x-circle me-1"></i>Cerrar
+              </button>
+            </div>
+            <div class="panel-pad" id="aud-body"></div>
           </div>
         </div>
 
@@ -1279,6 +1342,11 @@ function leerParams(){
   S.params.inicio_noc_h   =+document.getElementById('p-ini-noc').value;
   S.params.fin_noc_h      =+document.getElementById('p-fin-noc').value;
   S.params.horas_mes       =+document.getElementById('p-horas-mes').value;
+  // Fase 3: parámetros del almuerzo
+  var elOff=document.getElementById('p-alm-offset');
+  var elDur=document.getElementById('p-alm-dur');
+  if(elOff) S.params.almuerzo_offset_h    =+elOff.value;
+  if(elDur) S.params.almuerzo_duracion_min=+elDur.value;
   syncUiSummary();
 }
 
@@ -1309,7 +1377,11 @@ function applyData(data){
   document.getElementById('p-ini-noc').value    =S.params.inicio_noc_h;
   document.getElementById('p-fin-noc').value    =S.params.fin_noc_h;
   document.getElementById('p-horas-mes').value  =S.params.horas_mes||220;
-  calYear=S.params.anio||2026;
+  var elAo=document.getElementById('p-alm-offset');
+  var elAd=document.getElementById('p-alm-dur');
+  if(elAo) elAo.value = (S.params.almuerzo_offset_h!=null ? S.params.almuerzo_offset_h : 6);
+  if(elAd) elAd.value = (S.params.almuerzo_duracion_min!=null ? S.params.almuerzo_duracion_min : 25);
+  calYear=S.params.anio||(new Date()).getFullYear();
   renderReglas(); renderCalendario(); renderEmpleados(); renderCatalogTurnos();
   renderValidation(S.validation);
   syncUiSummary();
@@ -1464,6 +1536,125 @@ async function descargarDetalle(){
   } finally{spin(false);}
 }
 document.getElementById('btn-dl-detalle').addEventListener('click',descargarDetalle);
+
+// Fase 2.2: descarga de soportes individuales (ZIP por empleado).
+async function descargarSoportes(){
+  leerParams(); spin(true);
+  try{
+    var r=await fetch('/api/descargar-soportes',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({params:S.params,empleados:S.empleados,reglas:S.reglas,festivos:S.festivos})});
+    if(!r.ok){
+      var j; try{ j=await r.json(); }catch(e){}
+      toast('Error: '+((j&&j.error)||'no se pudieron generar los soportes'),'danger');
+      return;
+    }
+    var blob=await r.blob();
+    var ct=r.headers.get('Content-Type')||'';
+    var disp=r.headers.get('Content-Disposition')||'';
+    var name='Soportes.zip';
+    var m=disp.match(/filename="?([^";]+)"?/i);
+    if(m) name=m[1];
+    else if(ct.indexOf('zip')<0) name='LIQUIDACION_'+S.params.anio+'_'+String(S.params.mes).padStart(2,'0')+'.xlsx';
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download=name;a.click();
+    URL.revokeObjectURL(url);
+    toast('📥 Soportes generados','success');
+  } catch(err){toast('Error: '+err.message,'danger');}
+  finally{spin(false);}
+}
+var btnSop=document.getElementById('btn-dl-soportes');
+if(btnSop) btnSop.addEventListener('click',descargarSoportes);
+
+// Fase 2.4: ejecutar auditoría de turnos con múltiples conceptos y cruces.
+async function ejecutarAuditoria(){
+  leerParams(); spin(true);
+  try{
+    var r=await fetch('/api/auditoria',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({params:S.params,empleados:S.empleados,reglas:S.reglas,festivos:S.festivos})});
+    var j=await r.json();
+    if(!j.ok){ toast('Error: '+(j.error||'auditoría falló'),'danger'); return; }
+    renderAuditoria(j);
+  } catch(err){toast('Error: '+err.message,'danger');}
+  finally{spin(false);}
+}
+var btnAud=document.getElementById('btn-auditoria');
+if(btnAud) btnAud.addEventListener('click',ejecutarAuditoria);
+
+function renderAuditoria(data){
+  var panel=document.getElementById('panel-auditoria');
+  var body=document.getElementById('aud-body');
+  var kpi=data.kpi||{};
+  var kpiHtml='<div class="aud-kpi">'
+    +'<div class="kpi-box"><div class="lbl">Turnos revisados</div><div class="val">'+(kpi.turnos_revisados||0)+'</div></div>'
+    +'<div class="kpi-box"><div class="lbl">Multi-concepto</div><div class="val">'+(kpi.turnos_multi_concepto||0)+'</div></div>'
+    +'<div class="kpi-box"><div class="lbl">Cruce día</div><div class="val">'+(kpi.turnos_cruce_dia||0)+'</div></div>'
+    +'<div class="kpi-box"><div class="lbl">Cruce ciclo</div><div class="val">'+(kpi.turnos_cruce_ciclo||0)+'</div></div>'
+    +'<div class="kpi-box"><div class="lbl">Cruce mes</div><div class="val">'+(kpi.turnos_cruce_mes||0)+'</div></div>'
+    +'<div class="kpi-box"><div class="lbl">Post umbral '+data.umbral_horas+'h</div><div class="val">'+(kpi.turnos_post_umbral||0)+'</div></div>'
+    +'<div class="kpi-box"><div class="lbl">Dom/Festivos</div><div class="val">'+(kpi.turnos_dom_fest||0)+'</div></div>'
+    +'</div>';
+  var h=kpiHtml;
+  var hallazgos=(data.hallazgos||[]);
+  if(!hallazgos.length){
+    h+='<div class="alert alert-success py-2 mb-2"><i class="bi bi-check-circle me-2"></i>Sin hallazgos. La liquidación pasa todas las validaciones.</div>';
+  } else {
+    h+='<p class="text-muted mb-2" style="font-size:.82rem">'+hallazgos.length+' hallazgo(s) detectado(s):</p>';
+    hallazgos.forEach(function(it){
+      h+='<div class="aud-finding '+(it.severidad||'info')+'"><strong>['+(it.tipo||'').toUpperCase()+']</strong> '
+        +(it.empleado||'')+' · Día '+(it.dia||'')+' ('+fechaDMY(it.fecha||'')+'): '+it.mensaje+'</div>';
+    });
+  }
+  if(data.festivos_fuera_periodo && data.festivos_fuera_periodo.length){
+    h+='<div class="alert alert-warning py-2 mb-0 mt-2"><i class="bi bi-info-circle me-2"></i>'
+      +data.festivos_fuera_periodo.length+' festivo(s) cargado(s) están fuera del mes liquidado: '
+      +data.festivos_fuera_periodo.join(', ')+'</div>';
+  }
+  body.innerHTML=h;
+  panel.classList.remove('d-none');
+}
+
+// Fase 2.3: render del panel "Resumen del ciclo vigente" usando el bucket POS.
+function renderCicloVigente(){
+  var panel=document.getElementById('panel-ciclo-vigente');
+  var body=document.getElementById('cv-body');
+  if(!S.resultados.length){ panel.classList.add('d-none'); return; }
+  var html='';
+  var conPos=0;
+  S.resultados.forEach(function(r){
+    var pos=(r.ciclos||{}).pos||{};
+    var acum=+(pos.acum||0);
+    var hrs=+(pos.total_hrs||0);
+    if(hrs<=0 && acum<=0) return;
+    conPos++;
+    var umbral=+(r.horas_objetivo||S.params.horas_objetivo||132);
+    var pct=Math.min(100, Math.round((acum/umbral)*100));
+    var rec=+(pos.total_rec||0), ext=+(pos.total_ext||0);
+    var noc=+(pos.h_nocturnas||0), domf=+(pos.h_dom_fest||0);
+    var valRec=+(pos.val_rec||0), valExt=+(pos.val_ext||0);
+    html+='<div class="cv-card">'
+      +'<div class="cv-emp">'+(r.nombre||'')+' <small class="text-muted" style="font-weight:400">(ID '+(r.id||'')+')</small></div>'
+      +'<div class="cv-grid">'
+      +'  <div><div class="lbl">Inicio próximo ciclo</div><div class="val">'+fechaDMY(r.fic_siguiente)+'</div></div>'
+      +'  <div><div class="lbl">Horas acumuladas</div><div class="val">'+fmtH(hrs)+' h</div></div>'
+      +'  <div><div class="lbl">Recargos</div><div class="val">'+fmtH(rec)+' h</div></div>'
+      +'  <div><div class="lbl">Extras</div><div class="val">'+fmtH(ext)+' h</div></div>'
+      +'  <div><div class="lbl">Nocturnas</div><div class="val">'+fmtH(noc)+' h</div></div>'
+      +'  <div><div class="lbl">Dom/Festivas</div><div class="val">'+fmtH(domf)+' h</div></div>'
+      +'  <div><div class="lbl">Total acumulado</div><div class="val">'+fmtH(acum)+' h</div></div>'
+      +'  <div><div class="lbl">Valor proyectado</div><div class="val">$'+fmt(valRec+valExt)+'</div></div>'
+      +'</div>'
+      +'<div class="cv-bar" title="'+pct+'% del umbral del ciclo '+umbral+'h"><div style="width:'+pct+'%"></div></div>'
+      +'<small class="text-muted" style="font-size:.7rem">Próxima nómina arrancará desde '+fechaDMY(r.fic_siguiente)+'. Umbral del ciclo: '+umbral+' h.</small>'
+      +'</div>';
+  });
+  if(!conPos){
+    body.innerHTML='<div class="alert alert-secondary mb-0 py-2"><i class="bi bi-info-circle me-2"></i>Ningún empleado tiene horas en el siguiente ciclo (bucket POS) en este periodo.</div>';
+  } else {
+    body.innerHTML=html;
+  }
+  panel.classList.remove('d-none');
+}
+
 document.getElementById('btn-sidebar-toggle').addEventListener('click',toggleSidebar);
 
 // ─── Resultados ───
@@ -1473,6 +1664,7 @@ function renderResultados(){
   document.getElementById('res-placeholder').classList.add('d-none');
   document.getElementById('res-scroll').classList.remove('d-none');
   document.getElementById('btn-dl-excel').classList.remove('d-none');
+  var btnS=document.getElementById('btn-dl-soportes'); if(btnS) btnS.classList.remove('d-none');
   document.getElementById('res-search').classList.remove('d-none');
   function pc(k){return Math.round((S.reglas[k]||0)*100);}
   thead.innerHTML='<tr>'
@@ -1773,13 +1965,18 @@ function renderDetalle(){
   document.getElementById('det-placeholder').classList.add('d-none');
   document.getElementById('det-scroll').classList.remove('d-none');
   document.getElementById('btn-dl-detalle').classList.remove('d-none');
+  var btnAud2=document.getElementById('btn-auditoria'); if(btnAud2) btnAud2.classList.remove('d-none');
+  // Fase 2.3: refrescar panel de ciclo vigente cada vez que se renderiza el detalle
+  try{ renderCicloVigente(); }catch(e){}
 
   var fEmps=FILTER_STATE.emp, fCiclos=FILTER_STATE.ciclo, fTurnos=FILTER_STATE.turno, fDias=FILTER_STATE.dia;
   var term=DET_SEARCH.trim().toLowerCase();
   var CICLO_LABEL={'ant':'Anterior','act':'Actual','pos':'Posterior'};
   var CICLO_CLS={'ant':'ciclo-ant','act':'ciclo-act','pos':'ciclo-pos'};
   var HK=['total_hrs','total_rec','rec_diurno','rec_nocturno','rec_fest_d','rec_fest_n',
-          'total_ext','ext_diurna','ext_nocturna','ext_fest_d','ext_fest_n','valor_recargo','valor_extra','valor_total'];
+          'total_ext','ext_diurna','ext_nocturna','ext_fest_d','ext_fest_n','valor_recargo','valor_extra','valor_total',
+          'vr_rec_diurno','vr_rec_nocturno','vr_rec_fest_d','vr_rec_fest_n',
+          'vr_ext_diurna','vr_ext_nocturna','vr_ext_fest_d','vr_ext_fest_n'];
 
   // Agrupar por empleado, respetando filtros
   var groups=[];
@@ -1802,6 +1999,19 @@ function renderDetalle(){
   groups.forEach(function(g){HK.forEach(function(k){tot[k]+=g.ag[k];});});
   var totTurnos=groups.reduce(function(a,g){return a+g.dias.length;},0);
 
+  // Fase 2.1: cada celda de horas muestra debajo el valor monetario del concepto.
+  function cellHM(h, m){
+    h = +(h||0); m = +(m||0);
+    if(h === 0){
+      return '<td class="text-end text-muted">—</td>';
+    }
+    return '<td class="text-end">'+fmtH(h)+'<div class="cell-money">$'+fmt(m)+'</div></td>';
+  }
+  function cellHMTotal(h, m, bold){
+    h = +(h||0); m = +(m||0);
+    var cls = bold ? ' fw-bold' : '';
+    return '<td class="text-end'+cls+'">'+fmtH(h)+'<div class="cell-money">$'+fmt(m)+'</div></td>';
+  }
   function dayRow(emp,d){
     var cls=CICLO_CLS[d.ciclo]||'';
     return '<tr class="'+cls+'">'
@@ -1810,12 +2020,16 @@ function renderDetalle(){
       +'<td class="text-center"><span class="badge t-'+d.turno+'" style="font-size:.72rem">'+d.turno+'</span></td>'
       +'<td class="text-center"><span class="badge bg-secondary" style="font-size:.7rem">'+CICLO_LABEL[d.ciclo]+'</span></td>'
       +'<td class="text-end">'+fmtH(d.acum_ini)+'</td>'
-      +'<td class="text-end fw-bold">'+fmtH(d.total_rec)+'</td>'
-      +'<td class="text-end">'+fmtH(d.rec_diurno)+'</td><td class="text-end">'+fmtH(d.rec_nocturno)+'</td>'
-      +'<td class="text-end">'+fmtH(d.rec_fest_d)+'</td><td class="text-end">'+fmtH(d.rec_fest_n)+'</td>'
-      +'<td class="text-end fw-bold">'+fmtH(d.total_ext)+'</td>'
-      +'<td class="text-end">'+fmtH(d.ext_diurna)+'</td><td class="text-end">'+fmtH(d.ext_nocturna)+'</td>'
-      +'<td class="text-end">'+fmtH(d.ext_fest_d)+'</td><td class="text-end">'+fmtH(d.ext_fest_n)+'</td>'
+      + cellHMTotal(d.total_rec, d.valor_recargo, true)
+      + cellHM(d.rec_diurno,   d.vr_rec_diurno)
+      + cellHM(d.rec_nocturno, d.vr_rec_nocturno)
+      + cellHM(d.rec_fest_d,   d.vr_rec_fest_d)
+      + cellHM(d.rec_fest_n,   d.vr_rec_fest_n)
+      + cellHMTotal(d.total_ext, d.valor_extra, true)
+      + cellHM(d.ext_diurna,   d.vr_ext_diurna)
+      + cellHM(d.ext_nocturna, d.vr_ext_nocturna)
+      + cellHM(d.ext_fest_d,   d.vr_ext_fest_d)
+      + cellHM(d.ext_fest_n,   d.vr_ext_fest_n)
       +'<td class="text-end fw-bold">'+fmtH(d.total_hrs)+'</td>'
       +'<td class="text-end">$'+fmt(d.valor_recargo)+'</td><td class="text-end">$'+fmt(d.valor_extra)+'</td>'
       +'<td class="text-end fw-bold">$'+fmt(d.valor_total)+'</td></tr>';
@@ -1837,12 +2051,16 @@ function renderDetalle(){
           +' <span class="badge bg-secondary" style="font-size:.66rem">'+g.dias.length+'</span></td>'
         +'<td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td>'
         +'<td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td></td>'
-        +'<td class="text-end">'+fmtH(a.total_rec)+'</td>'
-        +'<td class="text-end">'+fmtH(a.rec_diurno)+'</td><td class="text-end">'+fmtH(a.rec_nocturno)+'</td>'
-        +'<td class="text-end">'+fmtH(a.rec_fest_d)+'</td><td class="text-end">'+fmtH(a.rec_fest_n)+'</td>'
-        +'<td class="text-end">'+fmtH(a.total_ext)+'</td>'
-        +'<td class="text-end">'+fmtH(a.ext_diurna)+'</td><td class="text-end">'+fmtH(a.ext_nocturna)+'</td>'
-        +'<td class="text-end">'+fmtH(a.ext_fest_d)+'</td><td class="text-end">'+fmtH(a.ext_fest_n)+'</td>'
+        + cellHMTotal(a.total_rec, a.valor_recargo, false)
+        + cellHM(a.rec_diurno,   a.vr_rec_diurno)
+        + cellHM(a.rec_nocturno, a.vr_rec_nocturno)
+        + cellHM(a.rec_fest_d,   a.vr_rec_fest_d)
+        + cellHM(a.rec_fest_n,   a.vr_rec_fest_n)
+        + cellHMTotal(a.total_ext, a.valor_extra, false)
+        + cellHM(a.ext_diurna,   a.vr_ext_diurna)
+        + cellHM(a.ext_nocturna, a.vr_ext_nocturna)
+        + cellHM(a.ext_fest_d,   a.vr_ext_fest_d)
+        + cellHM(a.ext_fest_n,   a.vr_ext_fest_n)
         +'<td class="text-end fw-bold">'+fmtH(a.total_hrs)+'</td>'
         +'<td class="text-end">$'+fmt(a.valor_recargo)+'</td><td class="text-end">$'+fmt(a.valor_extra)+'</td>'
         +'<td class="text-end fw-bold">$'+fmt(a.valor_total)+'</td></tr>';
@@ -1865,12 +2083,16 @@ function renderDetalle(){
 
   tfoot.innerHTML='<tr class="tr-foot"><td colspan="6" class="text-center">TOTALES — '+totTurnos+' turnos · '+groups.length+' empleados</td>'
     +'<td></td>'
-    +'<td class="text-end">'+fmtH(tot.total_rec)+'</td>'
-    +'<td class="text-end">'+fmtH(tot.rec_diurno)+'</td><td class="text-end">'+fmtH(tot.rec_nocturno)+'</td>'
-    +'<td class="text-end">'+fmtH(tot.rec_fest_d)+'</td><td class="text-end">'+fmtH(tot.rec_fest_n)+'</td>'
-    +'<td class="text-end">'+fmtH(tot.total_ext)+'</td>'
-    +'<td class="text-end">'+fmtH(tot.ext_diurna)+'</td><td class="text-end">'+fmtH(tot.ext_nocturna)+'</td>'
-    +'<td class="text-end">'+fmtH(tot.ext_fest_d)+'</td><td class="text-end">'+fmtH(tot.ext_fest_n)+'</td>'
+    + cellHMTotal(tot.total_rec, tot.valor_recargo, false)
+    + cellHM(tot.rec_diurno,   tot.vr_rec_diurno)
+    + cellHM(tot.rec_nocturno, tot.vr_rec_nocturno)
+    + cellHM(tot.rec_fest_d,   tot.vr_rec_fest_d)
+    + cellHM(tot.rec_fest_n,   tot.vr_rec_fest_n)
+    + cellHMTotal(tot.total_ext, tot.valor_extra, false)
+    + cellHM(tot.ext_diurna,   tot.vr_ext_diurna)
+    + cellHM(tot.ext_nocturna, tot.vr_ext_nocturna)
+    + cellHM(tot.ext_fest_d,   tot.vr_ext_fest_d)
+    + cellHM(tot.ext_fest_n,   tot.vr_ext_fest_n)
     +'<td class="text-end">'+fmtH(tot.total_hrs)+'</td>'
     +'<td class="text-end">$'+fmt(tot.valor_recargo)+'</td><td class="text-end">$'+fmt(tot.valor_extra)+'</td>'
     +'<td class="text-end">$'+fmt(tot.valor_total)+'</td></tr>';
@@ -1935,7 +2157,7 @@ function toggleTurnoPill(btn,cod,campo){
   saveParams(true);
 }
 
-['p-anio','p-mes','p-dias-ciclo','p-horas-obj','p-horas-turno','p-ini-noc','p-fin-noc','p-horas-mes']
+['p-anio','p-mes','p-dias-ciclo','p-horas-obj','p-horas-turno','p-ini-noc','p-fin-noc','p-horas-mes','p-alm-offset','p-alm-dur']
   .forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.addEventListener('change',function(){saveParams();});

@@ -157,6 +157,14 @@ def calcular_nomina(params, empleados, reglas, festivos):
             lunch_ini = inicio + alm_offset_min
             lunch_fin = lunch_ini + alm_dur_min
 
+            # Detectar si el almuerzo absorbe un cambio de día (medianoche).
+            # Cuando esto ocurre, los segmentos post-almuerzo dentro de la
+            # misma franja horaria conservan la clasificación festiva del
+            # día anterior (el trabajador estaba en descanso al cambiar el día).
+            first_midnight = ((inicio // (24 * 60)) + 1) * (24 * 60)
+            lunch_absorbs_midnight = (alm_dur_min > 0
+                                      and lunch_ini <= first_midnight <= lunch_fin)
+
             while remaining > 0:
                 # Saltar la franja del almuerzo (no se acumula ni se clasifica).
                 if alm_dur_min > 0 and lunch_ini <= cursor < lunch_fin:
@@ -176,12 +184,26 @@ def calcular_nomina(params, empleados, reglas, festivos):
                 md  = cursor % (24 * 60)
                 fin_ext = (fin_noc + 60) if turno in TURNO_N_TYPE else fin_noc
 
+                # Fecha de clasificación para el estado festivo:
+                # - es_fest_base (FN/FD) solo aplica al día de inicio del turno
+                # - Si el almuerzo absorbe la medianoche, los segmentos
+                #   post-almuerzo hasta la siguiente hora en punto usan
+                #   la fecha del día de inicio del turno
+                if (lunch_absorbs_midnight
+                        and cursor >= lunch_fin
+                        and cursor < first_midnight + 60):
+                    class_date = td
+                else:
+                    class_date = sd
+
                 all_segs.append({
                     "order":    (td, cursor),
                     "seg_date": sd,
                     "dur":      dur,
                     "noc":      _es_nocturno(md, ini_noc, fin_noc, fin_ext),
-                    "fest_dom": sd.weekday() == 6 or sd in festivos_dates or es_fest_base,
+                    "fest_dom": (class_date.weekday() == 6
+                                or class_date in festivos_dates
+                                or (es_fest_base and class_date == td)),
                     "td":       td,
                     "d_num":    d_num,
                 })

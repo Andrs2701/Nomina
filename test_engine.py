@@ -277,6 +277,50 @@ def test_referencia_excel_completa():
     print("  PASS test_referencia_excel_completa (con reporte)")
 
 
+# ── Test 12: Overrides de configuración del catálogo de turnos (turno_params) ──
+def test_configuracion_catalogo_overrides():
+    """Prueba que si cambia la configuración de los turnos en turno_params (parámetros),
+    el motor calcule correctamente los días pagados y los días de auxilio de transporte
+    sobre el motor de liquidación base."""
+    # 1. Configuración de parámetros personalizada con anulaciones (overrides)
+    params_custom = dict(PARAMS)
+    params_custom["turno_params"] = {
+        "D":  {"paga_dia": False, "aux_transp": True},   # Anula paga_dia de D a False
+        "N":  {"paga_dia": True,  "aux_transp": False},  # Anula aux_transp de N a False
+        "X":  {"paga_dia": True,  "aux_transp": False},  # Anula paga_dia de X a True
+    }
+    
+    # Empleado de prueba con turnos: 1 de mayo (D), 2 de mayo (N), 3 de mayo (X)
+    emp = {
+        "id": 1,
+        "nombre": "TEST_PARAMS",
+        "salario_mensual": SALARIO,
+        "fecha_inicio_ciclo": "2026-05-01",
+        "saldo_inicial_horas": 0.0,
+        "turnos": {"1": "D", "2": "N", "3": "X"},
+    }
+    
+    res = calcular_nomina(params_custom, [emp], REGLAS, FESTIVOS)
+    r = res[0]
+    
+    # 2. Validaciones
+    # Días paga día:
+    # - Turno D: paga_dia fue anulado a False (0 días)
+    # - Turno N: paga_dia es True (1 día)
+    # - Turno X: paga_dia fue anulado a True (1 día)
+    # Total esperado = 2 días paga día
+    assert r["dias_paga_dia"] == 2, f"Se esperaban 2 días paga día, se obtuvo: {r['dias_paga_dia']}"
+    
+    # Días auxilio de transporte:
+    # - Turno D: aux_transp es True (1 día)
+    # - Turno N: aux_transp fue anulado a False (0 días)
+    # - Turno X: aux_transp es False (0 días)
+    # Total esperado = 1 día con auxilio de transporte
+    assert r["dias_aux_transp"] == 1, f"Se esperaba 1 día con auxilio, se obtuvo: {r['dias_aux_transp']}"
+    
+    print("  PASS test_configuracion_catalogo_overrides")
+
+
 # ── Ejecutar todos los tests ────────────────────────────────
 if __name__ == "__main__":
     tests = [
@@ -291,6 +335,7 @@ if __name__ == "__main__":
         test_umbral_extras,
         test_fn_con_extras,
         test_referencia_excel_completa,
+        test_configuracion_catalogo_overrides,
     ]
     passed = 0
     failed = 0
